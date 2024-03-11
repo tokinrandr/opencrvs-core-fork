@@ -1,0 +1,34 @@
+{
+  "name": "@opencrvs/records",
+  "version": "1.4.0",
+  "description": "OpenCRVS records service",
+  "license": "MPL-2.0",
+  "private": true,
+  "scripts": {
+    "start": "cross-env NODE_ENV=development NODE_OPTIONS=--dns-result-order=ipv4first nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
+    "start:prod": "TS_NODE_BASEURL=./build/dist/src node -r tsconfig-paths/register build/dist/src/index.js",
+    "test": "jest --coverage --silent --noStackTrace && yarn test:compilation",
+    "test:watch": "jest --watch",
+    "open:cov": "yarn test && opener coverage/index.html",
+    "lint": "eslint -c .eslintrc.js --fix ./src",
+    "precommit": "yarn lint && lint-staged",
+    "test:compilation": "tsc --noEmit",
+    "build": "tsc",
+    "build:clean": "rm -rf build"
+  },
+  "dependencies": {
+    "@hapi/hapi": "^21.3.3",
+    "date-fns": "^3.4.0",
+    "hapi-pino": "^12.1.0",
+    "pg": "^8.11.3",
+    "pino-pretty": "^10.3.1",
+    "zod": "^3.22.4",
+    "zod-validation-error": "^3.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.25",
+    "@types/pg": "^8.11.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
+  }
+}

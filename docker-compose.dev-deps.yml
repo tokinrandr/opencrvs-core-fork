@@ -16,6 +16,16 @@ services:
     volumes:
       - './data/mongo:/data/db'
 
+  postgres:
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: opencrvs
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data
+
   redis:
     ports:
       - '6379:6379'
