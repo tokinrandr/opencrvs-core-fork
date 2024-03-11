@@ -1,11 +1,10 @@
 import * as Hapi from '@hapi/hapi'
-import { HOST, PORT, DEFAULT_TIMEOUT_MS, NODE_ENV } from './constants'
-import { routes } from './routes'
-import pino from 'hapi-pino'
-import { error } from './error'
-import { client } from './database'
 import { ZodError } from 'zod'
 import { fromZodError } from 'zod-validation-error'
+import { DEFAULT_TIMEOUT_MS, HOST, PORT } from './constants'
+import { client } from './database'
+import { error } from './error'
+import { routes } from './routes'
 
 export async function createServer() {
   const server = new Hapi.Server({
@@ -14,21 +13,6 @@ export async function createServer() {
     routes: {
       cors: { origin: ['*'] },
       payload: { maxBytes: 52428800, timeout: DEFAULT_TIMEOUT_MS }
-    }
-  })
-
-  await server.register({
-    // @TODO why as any, works in dci crvs api
-    plugin: pino,
-    options: {
-      redact: ['req.headers.authorization'],
-      ...(NODE_ENV === 'production'
-        ? {}
-        : {
-            transport: {
-              target: 'pino-pretty'
-            }
-          })
     }
   })
 

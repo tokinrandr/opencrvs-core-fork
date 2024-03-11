@@ -1,10 +1,11 @@
 import { UUID } from '@opencrvs/commons'
 import { Client } from 'pg'
+import { DATABASE } from './constants'
 
 export const client = new Client({
   user: 'postgres',
   password: 'postgres',
-  database: 'opencrvs'
+  database: DATABASE
 })
 
 type LocationRow = {

@@ -7,8 +7,9 @@
   "scripts": {
     "start": "cross-env NODE_ENV=development NODE_OPTIONS=--dns-result-order=ipv4first nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "start:prod": "TS_NODE_BASEURL=./build/dist/src node -r tsconfig-paths/register build/dist/src/index.js",
-    "test": "jest --coverage --silent --noStackTrace && yarn test:compilation",
-    "test:watch": "jest --watch",
+    "test": "yarn test:init-database && DATABASE=records-test node --require ts-node/register --require tsconfig-paths/register --test src/*.test.ts",
+    "test:watch": "yarn test:init-database && DATABASE=records-test node --require ts-node/register --require tsconfig-paths/register --test --watch src/*.test.ts",
+    "test:init-database": "docker run --network=host -e PGPASSWORD=postgres postgres:16.2 psql -h 127.0.0.2 -U postgres -c 'DROP DATABASE IF EXISTS \"records-test\"' -c 'CREATE DATABASE \"records-test\";'",
     "open:cov": "yarn test && opener coverage/index.html",
     "lint": "eslint -c .eslintrc.js --fix ./src",
     "precommit": "yarn lint && lint-staged",
