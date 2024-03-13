@@ -5,9 +5,9 @@ type LocationInput<Translations = Record<string, string>> = {
   id: UUID
   partOf: UUID
   translations: Translations
-  primaryLanguage: keyof Translations
+  defaultLanguage: keyof Translations
   type: 'ADMIN_STRUCTURE' | 'HEALTH_FACILITY' | 'CRVS_OFFICE'
-  level: number
+  level?: number
   lastUpdated: string
   status: 'active' | 'inactive'
 }
@@ -16,7 +16,7 @@ export const fhirLocation = ({
   id,
   partOf,
   translations,
-  primaryLanguage,
+  defaultLanguage,
   type,
   level,
   lastUpdated,
@@ -30,22 +30,28 @@ export const fhirLocation = ({
         }
       : { code: 'bu', display: 'Building' }
 
+  const locationLevel = level
+    ? [
+        {
+          system: 'http://opencrvs.org/specs/id/jurisdiction-type',
+          value: `LOCATION_LEVEL_${level}`
+        }
+      ]
+    : []
+
   return {
     id,
     resourceType: 'Location',
     identifier: [
-      {
-        system: 'http://opencrvs.org/specs/id/statistical-code',
-        value: 'ADMIN_STRUCTURE_ELC'
-      },
-      {
-        system: 'http://opencrvs.org/specs/id/jurisdiction-type',
-        value: `LOCATION_LEVEL_${level}`
-      }
+      // @TODO ?
+      // {
+      //   system: 'http://opencrvs.org/specs/id/statistical-code',
+      //   value: 'ADMIN_STRUCTURE_ELC'
+      // },
+      ...locationLevel
     ],
-    name: translations[primaryLanguage],
+    name: translations[defaultLanguage],
     alias: [],
-    description: '@TODO',
     status,
     mode: 'instance',
     partOf: {

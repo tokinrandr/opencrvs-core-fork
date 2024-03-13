@@ -1,6 +1,6 @@
 import type * as Hapi from '@hapi/hapi'
 import { afterEach, describe, it, before, beforeEach } from 'node:test'
-import { client } from './database'
+import { client } from './database/database'
 import { createServer } from './server'
 import { cleanDatabase } from './test-utils'
 import assert from 'node:assert'

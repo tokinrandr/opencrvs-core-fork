@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs'
-import { client } from './database'
+import { client } from './database/database'
 
 export async function cleanDatabase() {
   await client.query('DROP TABLE IF EXISTS config.languages;')

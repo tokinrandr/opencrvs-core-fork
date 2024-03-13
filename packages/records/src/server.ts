@@ -2,7 +2,6 @@ import * as Hapi from '@hapi/hapi'
 import { ZodError } from 'zod'
 import { fromZodError } from 'zod-validation-error'
 import { DEFAULT_TIMEOUT_MS, HOST, PORT } from './constants'
-import { client } from './database'
 import { error } from './error'
 import { routes } from './routes'
 
@@ -37,14 +36,12 @@ export async function createServer() {
 
   async function start() {
     await server.start()
-    await client.connect()
 
     server.log('info', `Records API started on ${HOST}:${PORT}`)
   }
 
   async function stop() {
     await server.stop()
-    await client.end()
     server.log('info', 'Search server stopped')
   }
 
