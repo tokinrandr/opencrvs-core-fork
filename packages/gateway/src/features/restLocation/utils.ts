@@ -119,7 +119,7 @@ export function setExtensions(
       url: 'http://hl7.org/fhir/StructureDefinition/location-boundary-geojson',
       valueAttachment: {
         contentType: 'application/geo+json',
-        data: '<base64>' // base64 encoded geoJSON feature object
+        data: 'base64' // base64 encoded geoJSON feature object
       }
     },
     {

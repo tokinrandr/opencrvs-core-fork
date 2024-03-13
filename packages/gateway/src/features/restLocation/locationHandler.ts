@@ -248,6 +248,8 @@ async function batchLocationsHandler(locations: Location[]) {
       'POST',
       JSON.stringify(locationsBundle)
     )
+    console.log(JSON.stringify(locationsBundle))
+
     statisticalToFhirIDMapOfParentLocations = new Map(
       Array.from(statisticalToFhirIDMapOfParentLocations.entries()).concat(
         each.map((loc, i) => [
