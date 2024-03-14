@@ -12,6 +12,9 @@
     "./http": "./build/dist/http.js",
     "./fixtures": "./build/dist/fixtures.js"
   },
+  "files": [
+    "build"
+  ],
   "scripts": {
     "start": "yarn build:watch",
     "test": "yarn test:compilation && jest",
