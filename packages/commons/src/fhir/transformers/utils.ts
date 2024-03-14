@@ -63,7 +63,8 @@ import {
   isURLReference,
   urlReferenceToResourceIdentifier,
   BundleEntryWithFullUrl,
-  findEntryFromBundle
+  findEntryFromBundle,
+  WithUUID
 } from '..'
 
 import { CompositionSectionTitleByCode, PartialBy } from '../../types'
@@ -184,12 +185,15 @@ export function selectOrCreateObservationResource(
 ): Observation {
   const observation = fhirBundle.entry
     .map(({ resource }) => resource)
-    .filter(isObservation)
+    .filter((resource) => isObservation(resource as WithUUID<Bundle>))
     .find((entry) => {
+      const observation = entry as Observation
       const obCoding =
-        entry.code &&
-        entry.code.coding &&
-        entry.code.coding.find((obCode) => obCode.code === observationCode)
+        observation.code &&
+        observation.code.coding &&
+        observation.code.coding.find(
+          (obCode) => obCode.code === observationCode
+        )
       if (obCoding) {
         return true
       }
@@ -197,7 +201,7 @@ export function selectOrCreateObservationResource(
     })
 
   if (observation) {
-    return observation
+    return observation as Observation
   }
 
   /* Existing obseration not found for given type */
