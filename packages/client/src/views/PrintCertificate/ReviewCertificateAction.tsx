@@ -19,7 +19,7 @@ import {
   AppBar,
   Spinner
 } from '@opencrvs/components'
-import React from 'react'
+import React, { useCallback, useEffect, useRef } from 'react'
 import { useDispatch } from 'react-redux'
 import { useLocation, useParams } from 'react-router'
 import { messages as certificateMessages } from '@client/i18n/messages/views/certificate'
@@ -32,13 +32,16 @@ import { WORKQUEUE_TABS } from '@client/components/interface/Navigation'
 import styled from 'styled-components'
 import { constantsMessages } from '@client/i18n/messages'
 import { usePrintableCertificate } from './usePrintableCertificate'
+import { createPDF } from '@client/pdfRenderer'
 
 const CertificateContainer = styled.div``
 
 const ReviewCertificateFrame = ({
-  children
+  children,
+  iframeRef
 }: {
   children: React.ReactNode
+  iframeRef?: React.MutableRefObject<HTMLIFrameElement | null>
 }) => {
   const intl = useIntl()
   const dispatch = useDispatch()
@@ -70,17 +73,27 @@ const ReviewCertificateFrame = ({
             </Button>
           }
           desktopRight={
-            <Button
-              type="icon"
-              onClick={() => dispatch(goToHomeTab(WORKQUEUE_TABS.readyToPrint))}
-            >
-              <Icon name="X" size="large" />
-            </Button>
+            <Stack>
+              <Button
+                type="primary"
+                onClick={() => iframeRef?.current?.contentWindow?.print()}
+              >
+                Continue
+              </Button>
+              {/* <Button
+                type="icon"
+                onClick={() =>
+                  dispatch(goToHomeTab(WORKQUEUE_TABS.readyToPrint))
+                }
+              >
+                <Icon name="X" size="large" />
+              </Button> */}
+            </Stack>
           }
         />
       }
       skipToContentText={intl.formatMessage(
-        constantsMessages.skipToContentText
+        constantsMessages.skipToMainContent
       )}
     >
       {children}
@@ -96,10 +109,54 @@ export const ReviewCertificate = () => {
     handleCertify,
     isPrintInAdvanced,
     canUserEditRecord,
-    handleEdit
+    handleEdit,
+    dataUrl
   } = usePrintableCertificate(registrationId)
   const intl = useIntl()
   const [modal, openModal] = useModal()
+  const iframeRef = useRef<HTMLIFrameElement | null>(null)
+
+  const howTo = useCallback(async () => {
+    const confirmHowTo = await openModal<'back' | 'ok'>((close) => (
+      <ResponsiveModal
+        id="confirm-print-modal"
+        title="Review certificate preview"
+        actions={[
+          <Button
+            type="tertiary"
+            key="close-modal"
+            onClick={() => {
+              close('back')
+            }}
+            id="close-modal"
+          >
+            Cancel
+          </Button>,
+          <Button
+            type="primary"
+            key="print-certificate"
+            onClick={() => close('ok')}
+            id="print-certificate"
+          >
+            OK
+          </Button>
+        ]}
+        show={true}
+        handleClose={() => close(null)}
+        contentHeight={100}
+      >
+        Please review the certificate with the collector and confirm that the
+        details are correct.
+      </ResponsiveModal>
+    ))
+
+    if (confirmHowTo) {
+    }
+  }, [openModal])
+
+  useEffect(() => {
+    howTo()
+  }, [howTo])
 
   if (loading) {
     return (
@@ -156,48 +213,13 @@ export const ReviewCertificate = () => {
   }
 
   return (
-    <ReviewCertificateFrame>
-      <Frame.LayoutCentered>
-        {svg && (
-          <Stack direction="column">
-            <Box>
-              <CertificateContainer
-                id="print"
-                dangerouslySetInnerHTML={{ __html: svg }}
-              />
-            </Box>
-            <Content
-              title={intl.formatMessage(certificateMessages.reviewTitle)}
-              subtitle={intl.formatMessage(
-                certificateMessages.reviewDescription
-              )}
-              bottomActionButtons={[
-                <Button
-                  key="confirm-and-print"
-                  type="primary"
-                  id="confirm-print"
-                  onClick={confirmAndPrint}
-                >
-                  <Icon name="Check" size="medium" />
-                  {intl.formatMessage(certificateMessages.confirmAndPrint)}
-                </Button>,
-
-                canUserEditRecord ? (
-                  <Button
-                    key="edit-record"
-                    type="negative"
-                    onClick={handleEdit}
-                  >
-                    {intl.formatMessage(buttonMessages.editRecord)}
-                  </Button>
-                ) : (
-                  <></>
-                )
-              ]}
-            ></Content>
-          </Stack>
-        )}
-      </Frame.LayoutCentered>
+    <ReviewCertificateFrame iframeRef={iframeRef}>
+      <iframe
+        ref={iframeRef}
+        src={dataUrl}
+        title="PDF Preview"
+        style={{ width: '100%', height: '100%', border: 0 }}
+      />
       {modal}
     </ReviewCertificateFrame>
   )

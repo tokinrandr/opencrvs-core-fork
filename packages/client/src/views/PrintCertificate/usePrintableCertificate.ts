@@ -41,6 +41,7 @@ import {
   getCountryTranslations
 } from './utils'
 import { Event } from '@client/utils/gateway'
+import { createPDF } from '@client/pdfRenderer'
 
 export const usePrintableCertificate = (declarationId: string) => {
   const offlineData = useSelector(getOfflineData)
@@ -60,18 +61,30 @@ export const usePrintableCertificate = (declarationId: string) => {
     declaration?.event !== Event.Marriage && hasRegisterScope(scope)
   const userDetails = useSelector(getUserDetails)
 
+  const [dataUrl, setDataUrl] = useState<string>()
+
   useEffect(() => {
-    if (declaration)
-      getPDFTemplateWithSVG(offlineData, declaration, 'A4', state).then(
-        (svg) => {
-          const svgWithFonts = addFontsToSvg(
-            svg.svgCode,
-            offlineData.templates.fonts ?? {}
-          )
-          setSvg(svgWithFonts)
-        }
+    async function asdf() {
+      if (!declaration || !userDetails) return
+
+      const { pdfTemplate } = await getPDFTemplateWithSVG(
+        offlineData,
+        declaration,
+        'A4',
+        state
       )
-  }, [offlineData, declaration, state])
+
+      createPDF(
+        pdfTemplate,
+        declaration,
+        userDetails,
+        offlineData,
+        intl
+      ).getBlob((url) => setDataUrl(URL.createObjectURL(url)))
+    }
+
+    asdf()
+  }, [declaration, intl, offlineData, state, userDetails])
 
   const handleCertify = () => {
     const draft = cloneDeep(declaration) as IPrintableDeclaration
@@ -120,8 +133,8 @@ export const usePrintableCertificate = (declarationId: string) => {
 
     printCertificate(intl, draft, userDetails, offlineData, state, languages)
 
-    dispatch(modifyDeclaration(draft))
-    dispatch(writeDeclaration(draft))
+    //dispatch(modifyDeclaration(draft))
+    //dispatch(writeDeclaration(draft))
     dispatch(goToHomeTab(WORKQUEUE_TABS.readyToPrint))
   }
 
@@ -132,10 +145,11 @@ export const usePrintableCertificate = (declarationId: string) => {
 
   return {
     svg,
-    loading: !declaration || !svg,
+    loading: !declaration || !dataUrl,
     handleCertify,
     isPrintInAdvanced,
     canUserEditRecord,
-    handleEdit
+    handleEdit,
+    dataUrl
   }
 }

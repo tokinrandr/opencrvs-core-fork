@@ -228,7 +228,7 @@ src: url("${url}") format("truetype");
       )
     )
     .join('')
-  svg.appendChild(style)
+  svg.prepend(style)
   const serializer = new XMLSerializer()
   return serializer.serializeToString(svg)
 }
