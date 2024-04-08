@@ -113,11 +113,7 @@ import { IOfflineData, LocationType } from '@client/offline/reducer'
 import { isEqual, flatten } from 'lodash'
 import { SimpleDocumentUploader } from './DocumentUploadfield/SimpleDocumentUploader'
 import { getOfflineData } from '@client/offline/selectors'
-import {
-  dynamicDispatch,
-  IDeclaration,
-  writeDeclaration
-} from '@client/declarations'
+import { dynamicDispatch } from '@client/declarations'
 import { useDispatch, useSelector } from 'react-redux'
 import { LocationSearch } from '@opencrvs/components/lib/LocationSearch'
 import { REGEXP_NUMBER_INPUT_NON_NUMERIC } from '@client/utils/constants'
@@ -130,9 +126,7 @@ import { IBaseAdvancedSearchState } from '@client/search/advancedSearch/utils'
 import { UserDetails } from '@client/utils/userUtils'
 import { VerificationButton } from '@opencrvs/components/lib/VerificationButton'
 import { useOnlineStatus } from '@client/utils'
-import { match, useRouteMatch } from 'react-router'
-import { saveDraftAndRedirectToNidIntegration } from '@client/views/OIDPVerificationCallback/utils'
-import { getDraftsState } from '@client/declarations/selectors'
+import { useNidAuthentication } from '@client/views/OIDPVerificationCallback/utils'
 import { BulletList, Divider } from '@opencrvs/components'
 import { Heading2, Heading3 } from '@opencrvs/components/lib/Headings/Headings'
 
@@ -757,7 +751,7 @@ interface IFormSectionProps {
 interface IStateProps {
   offlineCountryConfig: IOfflineData
   userDetails: UserDetails | null
-  declarations: IDeclaration[] | null
+  onNidAuthenticationClick: () => void
 }
 
 interface IDispatchProps {
@@ -768,7 +762,7 @@ type Props = IFormSectionProps &
   IStateProps &
   IDispatchProps &
   FormikProps<IFormSectionData> &
-  IntlShapeProps & { match: match }
+  IntlShapeProps
 
 interface IQueryData {
   [key: string]: any
@@ -1051,29 +1045,7 @@ class FormSectionComponent extends React.Component<Props> {
               : field.type === NID_VERIFICATION_BUTTON
               ? ({
                   ...field,
-                  onClick: () => {
-                    const matchParams = this.props.match.params as {
-                      declarationId: string
-                      groupId: string
-                      pageId: string
-                    }
-                    const declaration = this.props.declarations?.find(
-                      (declaration) =>
-                        declaration.id === matchParams.declarationId
-                    )
-                    if (!declaration) {
-                      return
-                    }
-                    saveDraftAndRedirectToNidIntegration(
-                      declaration,
-                      writeDeclaration,
-                      offlineCountryConfig,
-                      matchParams.declarationId,
-                      matchParams.pageId,
-                      this.props.match.url
-                    )
-                  }
-                  //TODO: HANDLE FETCH FOR NID
+                  onClick: this.props.onNidAuthenticationClick
                 } as INidVerificationButton)
               : field
 
@@ -1249,8 +1221,7 @@ export const FormFieldGenerator: React.FC<IFormSectionProps> = (props) => {
   const userDetails = useSelector(getUserDetails)
   const intl = useIntl()
   const dispatch = useDispatch()
-  const match = useRouteMatch()
-  const { declarations } = useSelector(getDraftsState)
+  const { onClick: onNidAuthenticationClick } = useNidAuthentication()
 
   return (
     <Formik<IFormSectionData>
@@ -1276,8 +1247,7 @@ export const FormFieldGenerator: React.FC<IFormSectionProps> = (props) => {
           offlineCountryConfig={offlineCountryConfig}
           userDetails={userDetails}
           dynamicDispatch={(...args) => dispatch(dynamicDispatch(...args))}
-          match={match}
-          declarations={declarations}
+          onNidAuthenticationClick={onNidAuthenticationClick}
         />
       )}
     </Formik>
