@@ -12,9 +12,10 @@ import * as jwt from 'jsonwebtoken'
 import * as jose from 'jose'
 import fetch from 'node-fetch'
 import {
-  OIDP_REST_URL,
   OIDP_CLIENT_PRIVATE_KEY,
-  OIDP_JWT_AUD_CLAIM
+  OIDP_JWT_AUD_CLAIM,
+  OIDP_TOKEN_URL,
+  OIDP_USERINFO_URL
 } from '@gateway/constants'
 import { fetchFromHearth } from '@gateway/features/fhir/utils'
 import { logger } from '@gateway/logger'
@@ -23,10 +24,6 @@ import { OIDPUserInfo } from './oidp-types'
 const TOKEN_GRANT_TYPE = 'authorization_code'
 const CLIENT_ASSERTION_TYPE =
   'urn:ietf:params:oauth:client-assertion-type:jwt-bearer'
-const OIDP_TOKEN_ENDPOINT =
-  OIDP_REST_URL && new URL('oauth/token', OIDP_REST_URL).toString()
-const OIDP_USERINFO_ENDPOINT =
-  OIDP_REST_URL && new URL('oidc/userinfo', OIDP_REST_URL).toString()
 
 const JWT_ALG = 'RS256'
 const JWT_EXPIRATION_TIME = '1h'
@@ -92,7 +89,7 @@ export const fetchToken = async ({
     client_assertion: await generateSignedJwt(clientId)
   })
 
-  const request = await fetch(OIDP_TOKEN_ENDPOINT!, {
+  const request = await fetch(OIDP_TOKEN_URL!, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -105,7 +102,7 @@ export const fetchToken = async ({
 }
 
 export const fetchUserInfo = async (accessToken: string) => {
-  const request = await fetch(OIDP_USERINFO_ENDPOINT!, {
+  const request = await fetch(OIDP_USERINFO_URL!, {
     headers: {
       Authorization: 'Bearer ' + accessToken
     }
