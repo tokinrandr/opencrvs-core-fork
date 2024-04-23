@@ -35,7 +35,7 @@ import getForms from '@config/handlers/forms/formsHandler'
 import getDashboardQueries from '@config/handlers/dashboardQueries/dashboardQueries'
 import { ServerRoute } from '@hapi/hapi'
 import * as Joi from 'joi'
-import { resolveLocationLeafLevel } from '@config/handlers/locations/resolveChildren'
+import { resolveLocationLeafLevel } from '@config/handlers/locations/resolveLocationLeafLevel'
 
 export const enum RouteScope {
   DECLARE = 'declare',
@@ -71,8 +71,6 @@ export default function getRoutes(): ServerRoute[] {
       path: '/locations/{locationId}/leaf',
       handler: resolveLocationLeafLevel,
       options: {
-        // @TODO: :thinking: if auth should be used, as it's not a public API in the end of the day?
-        auth: false,
         tags: ['api'],
         description: 'Retrieve the leaf level of a particular location',
         validate: {

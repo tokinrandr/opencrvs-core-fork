@@ -8,15 +8,20 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { UUID } from '@opencrvs/commons'
+import { IAuthHeader, UUID } from '@opencrvs/commons'
 import { SavedLocation } from '@search/../../commons/build/dist/types'
 import { APPLICATION_CONFIG_URL } from '@search/constants'
 
 const FETCH_LEAF_LEVELS_LOCATION_URL = (id: UUID) =>
   new URL(`/locations/${id}/leaf`, APPLICATION_CONFIG_URL)
 
-export async function resolveLocationLeafLevels(locationId: UUID) {
-  const response = await fetch(FETCH_LEAF_LEVELS_LOCATION_URL(locationId))
+export async function resolveLocationLeafLevels(
+  locationId: UUID,
+  authHeader: IAuthHeader
+) {
+  const response = await fetch(FETCH_LEAF_LEVELS_LOCATION_URL(locationId), {
+    headers: { ...authHeader }
+  })
   if (!response.ok) {
     throw new Error(
       "Couldn't fetch the leaf level location from config: " +

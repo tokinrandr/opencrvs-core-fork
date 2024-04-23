@@ -8,6 +8,7 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
+import { IAuthHeader } from '@opencrvs/commons'
 import {
   CERTIFIED_STATUS,
   REGISTERED_STATUS
@@ -19,7 +20,8 @@ import { resolveLocationLeafLevels } from './location'
 export async function advancedQueryBuilder(
   params: IAdvancedSearchParam,
   createdBy: string,
-  isExternalSearch: boolean
+  isExternalSearch: boolean,
+  authHeader: IAuthHeader
 ) {
   params = transformDeprecatedParamsToSupported(params)
 
@@ -161,7 +163,8 @@ export async function advancedQueryBuilder(
 
   if (params.declarationJurisdictionId) {
     const leafLevelJurisdictionIds = await resolveLocationLeafLevels(
-      params.declarationJurisdictionId
+      params.declarationJurisdictionId,
+      authHeader
     )
     must.push({
       terms: {
@@ -188,7 +191,8 @@ export async function advancedQueryBuilder(
 
   if (params.eventJurisdictionId) {
     const leafLevelJurisdictionIds = await resolveLocationLeafLevels(
-      params.eventJurisdictionId
+      params.eventJurisdictionId,
+      authHeader
     )
     must.push({
       terms: {

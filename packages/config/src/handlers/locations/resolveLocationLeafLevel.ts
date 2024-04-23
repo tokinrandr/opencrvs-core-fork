@@ -15,7 +15,6 @@ import {
 } from '@opencrvs/commons/types'
 import { FHIR_URL } from '@config/config/constants'
 import { UUID } from '@opencrvs/commons'
-import { compact } from 'lodash'
 import { ServerRoute } from '@hapi/hapi'
 
 /**
@@ -40,10 +39,8 @@ async function fetchLocationChildren(locationId: UUID) {
 export const resolveLocationLeafLevel: ServerRoute['handler'] = async (req) => {
   const { locationId } = req.params as { locationId: UUID }
   const locations = await fetchLocationChildren(locationId)
-  const allPartOfs = compact(
-    locations.map(
-      ({ partOf }) => partOf && resourceIdentifierToUUID(partOf.reference)
-    )
+  const allPartOfs = locations.map(
+    ({ partOf }) => partOf && resourceIdentifierToUUID(partOf.reference)
   )
 
   // Finds the locations that aren't part of anything

@@ -14,13 +14,15 @@ import { ISearchCriteria, SortOrder } from '@search/features/search/types'
 import { advancedQueryBuilder } from '@search/features/search/utils'
 import { logger } from '@search/logger'
 import { OPENCRVS_INDEX_NAME } from '@search/constants'
+import { IAuthHeader } from '@opencrvs/commons'
 
 export const DEFAULT_SIZE = 10
 const DEFAULT_SEARCH_TYPE = 'compositions'
 
 export async function formatSearchParams(
   searchPayload: ISearchCriteria,
-  isExternalSearch: boolean
+  isExternalSearch: boolean,
+  authHeader: IAuthHeader
 ) {
   const {
     createdBy = '',
@@ -42,7 +44,8 @@ export async function formatSearchParams(
       query: await advancedQueryBuilder(
         parameters,
         createdBy,
-        isExternalSearch
+        isExternalSearch,
+        authHeader
       ),
       sort
     }
@@ -51,9 +54,14 @@ export async function formatSearchParams(
 
 export const advancedSearch = async (
   isExternalSearch: boolean,
-  payload: ISearchCriteria
+  payload: ISearchCriteria,
+  authHeader: IAuthHeader
 ) => {
-  const formattedParams = await formatSearchParams(payload, isExternalSearch)
+  const formattedParams = await formatSearchParams(
+    payload,
+    isExternalSearch,
+    authHeader
+  )
   let response: ApiResponse<ISearchResponse<any>>
   try {
     response = await client.search(formattedParams, {

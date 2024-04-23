@@ -192,7 +192,8 @@ export async function advancedRecordSearch(
     }
     const result = await advancedSearch(
       isExternalSearch,
-      request.payload as ISearchCriteria
+      request.payload as ISearchCriteria,
+      { Authorization: request.headers.authorization }
     )
     if (!result) {
       return h.response({}).code(404)
