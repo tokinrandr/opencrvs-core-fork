@@ -15,7 +15,6 @@ import { useIntl } from 'react-intl'
 import { useDispatch, useSelector } from 'react-redux'
 import {
   addNidUserInfoToDeclaration,
-  useCheckNonce,
   useExtractCallBackState,
   useQueryParams
 } from '@client/views/OIDPVerificationCallback/utils'
@@ -34,7 +33,6 @@ import { OIDP_VERIFICATION_CALLBACK } from '@client/navigation/routes'
 // OIDP Verification Callback
 // --
 // Checks the ?state= query parameter for a JSON string like: { pathname: "/path/somewhere" }
-// Checks that the &nonce= parameter matches the one in localStorage, removes it if yes, throws if not
 // Redirects to the pathname in state
 
 const Page = styled.div`
@@ -61,7 +59,6 @@ const UserActionsContainer = styled.div`
 export const OIDPVerificationCallback = () => {
   const params = useQueryParams()
   const { pathname, declarationId, section } = useExtractCallBackState()
-  const isNonceOk = useCheckNonce()
   const code = params.get('code')
   const offlineData = useSelector(getOfflineData)
   const clientId = offlineData.systems.find((s) => s.type === 'NATIONAL_ID')
@@ -87,7 +84,7 @@ export const OIDPVerificationCallback = () => {
     }
   })
 
-  if (!pathname || !isNonceOk) {
+  if (!pathname) {
     // Do not redirect and let the hooks throw
     return null
   }
