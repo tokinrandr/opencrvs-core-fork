@@ -14,7 +14,10 @@ import {
   TIME_TO,
   LOCATION_ID
 } from '@metrics/features/metrics/constants'
-import { getTotalCertifications } from '@metrics/features/certifications/service'
+import {
+  getAllTotalCertifications,
+  getTotalCertifications
+} from '@metrics/features/certifications/service'
 
 export async function totalCertificationsHandler(
   request: Hapi.Request,
@@ -23,8 +26,10 @@ export async function totalCertificationsHandler(
   const timeStart = request.query[TIME_FROM]
   const timeEnd = request.query[TIME_TO]
   const locationId = request.query[LOCATION_ID]
-    ? 'Location/' + request.query[LOCATION_ID]
-    : undefined
 
-  return getTotalCertifications(timeStart, timeEnd, locationId)
+  if (locationId) {
+    return getAllTotalCertifications(timeStart, timeEnd)
+  } else {
+    return getTotalCertifications(timeStart, timeEnd, locationId)
+  }
 }
