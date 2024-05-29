@@ -110,6 +110,7 @@ services:
       - USER_MANAGEMENT_URL=http://user-mgnt:3030
       - DOCUMENTS_URL=http://documents:9050
       - FHIR_URL=http://hearth:3447/fhir
+      - APPLICATION_CONFIG_URL=http://config:2021/
   # END User facing services
   scheduler:
     image: opencrvs/ocrvs-scheduler:${VERSION}

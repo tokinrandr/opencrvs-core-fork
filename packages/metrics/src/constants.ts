@@ -47,6 +47,7 @@ export const DEATH_REPORT_PATH =
     : join(__dirname, '../src/scripts/Death_Report.csv')
 export const HEARTH_MONGO_URL =
   process.env.HEARTH_MONGO_URL || 'mongodb://localhost/hearth-dev'
-
+export const APPLICATION_CONFIG_URL =
+  process.env.APPLICATION_CONFIG_URL || 'http://localhost:2021/'
 export const DASHBOARD_MONGO_URL =
   process.env.DASHBOARD_MONGO_URL || 'mongodb://localhost/performance'
