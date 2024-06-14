@@ -107,3 +107,5 @@ export const ORGANISATIONS_INDEX = '/organisation/:locationId?'
 export const OIDP_VERIFICATION_CALLBACK = '/mosip-callback'
 
 export const PRINT_RECORD = '/print-record/:declarationId'
+
+export const WORKQUEUE = '/workqueue/:slug'

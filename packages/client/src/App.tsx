@@ -70,10 +70,11 @@ import UserRoles from '@client/views/SysAdmin/Config/UserRoles/UserRoles'
 import { OIDPVerificationCallback } from './views/OIDPVerificationCallback/OIDPVerificationCallback'
 import { ApolloProvider } from '@client/utils/ApolloProvider'
 import { Home } from '@client/views/OfficeHome/Home'
-import { PrintRecord } from './views/PrintRecord/PrintRecord'
-import { ReviewCorrection } from './views/ReviewCorrection/ReviewCorrection'
-import { ReviewCertificate } from './views/PrintCertificate/ReviewCertificateAction'
-import AllUserEmail from './views/SysAdmin/Communications/AllUserEmail/AllUserEmail'
+import { PrintRecord } from '@client/views/PrintRecord/PrintRecord'
+import { ReviewCorrection } from '@client/views/ReviewCorrection/ReviewCorrection'
+import { ReviewCertificate } from '@client/views/PrintCertificate/ReviewCertificateAction'
+import AllUserEmail from '@client/views/SysAdmin/Communications/AllUserEmail/AllUserEmail'
+import { WorkqueuePage } from '@client/views/Workqueue/WorkqueuePage'
 
 interface IAppProps {
   client?: ApolloClient<NormalizedCacheObject>
@@ -134,6 +135,11 @@ export function App(props: IAppProps) {
                                               exact
                                               path={routes.HOME}
                                               component={Home}
+                                            />
+                                            <ProtectedRoute
+                                              exact
+                                              path={routes.WORKQUEUE}
+                                              component={WorkqueuePage}
                                             />
                                             <ProtectedRoute
                                               exact
