@@ -104,8 +104,16 @@ export async function getApplicationConfig(
   const configFromCountryConfig = await getConfigFromCountry(
     request?.headers?.authorization
   )
+  logger.info(
+    `configFromCountryConfig,
+      ${JSON.stringify(configFromCountryConfig)}`
+  )
   const stripApplicationConfig = stripIdFromApplicationConfig(
     configFromCountryConfig
+  )
+  logger.info(
+    `stripApplicationConfig,
+      ${JSON.stringify(stripApplicationConfig)}`
   )
   const { error, value } = applicationConfigResponseValidation.validate(
     stripApplicationConfig,
@@ -118,9 +126,17 @@ export async function getApplicationConfig(
 
   try {
     const configFromDB = await ApplicationConfig.findOne({})
+    logger.info(
+      `configFromDB,
+        ${JSON.stringify(configFromDB)}`
+    )
     const finalConfig = merge(
       updatedConfigFromCountryConfig,
       configFromDB?.toObject()
+    )
+    logger.info(
+      `finalConfig,
+        ${JSON.stringify(finalConfig)}`
     )
     return finalConfig
   } catch (error) {
@@ -140,6 +156,10 @@ export async function getLoginConfigHandler(
     'USER_NOTIFICATION_DELIVERY_METHOD',
     'INFORMANT_NOTIFICATION_DELIVERY_METHOD'
   ])
+  logger.info(
+    `refineConfigResponse,
+      ${JSON.stringify(refineConfigResponse)}`
+  )
   return { config: refineConfigResponse }
 }
 
@@ -150,11 +170,22 @@ export async function updateApplicationConfigHandler(
   try {
     let applicationConfig
     const configFromDB = await ApplicationConfig.findOne({})
+    logger.info(
+      `configFromDB,
+        ${JSON.stringify(configFromDB)}`
+    )
     const changeConfig = request.payload as IApplicationConfigurationModel
-
+    logger.info(
+      `changeConfig,
+        ${JSON.stringify(changeConfig)}`
+    )
     if (configFromDB !== null) {
       applicationConfig = merge(configFromDB, changeConfig)
     }
+    logger.info(
+      `applicationConfig,
+        ${JSON.stringify(applicationConfig)}`
+    )
     applicationConfig = changeConfig
     await ApplicationConfig.findOneAndUpdate(
       {},
