@@ -67,11 +67,21 @@ const migrateIndexToAlias = async (timestamp: string) => {
     },
     { meta: true }
   )
-  await client.indices.clone({
-    index: ELASTICSEARCH_INDEX_NAME,
-    target: `${ELASTICSEARCH_INDEX_NAME}-${timestamp}`
-  })
-  await client.indices.delete({ index: ELASTICSEARCH_INDEX_NAME })
+  await client.indices.clone(
+    {
+      index: ELASTICSEARCH_INDEX_NAME,
+      target: `${ELASTICSEARCH_INDEX_NAME}-${timestamp}`
+    },
+    {
+      meta: true
+    }
+  )
+  await client.indices.delete(
+    { index: ELASTICSEARCH_INDEX_NAME },
+    {
+      meta: true
+    }
+  )
 }
 
 export const up = async (db: Db, _client: MongoClient) => {
@@ -106,10 +116,15 @@ export const down = async (db: Db, _client: MongoClient) => {
   )
 
   const indexWithOcrvsAlias = Object.keys(aliasResponse.body)[0]
-  await client.indices.deleteAlias({
-    index: indexWithOcrvsAlias,
-    name: ELASTICSEARCH_INDEX_NAME
-  })
+  await client.indices.deleteAlias(
+    {
+      index: indexWithOcrvsAlias,
+      name: ELASTICSEARCH_INDEX_NAME
+    },
+    {
+      meta: true
+    }
+  )
 
   await client.indices.putSettings(
     {
@@ -125,10 +140,15 @@ export const down = async (db: Db, _client: MongoClient) => {
     }
   )
 
-  await client.indices.clone({
-    index: BACKUP_INDEX,
-    target: ELASTICSEARCH_INDEX_NAME
-  })
+  await client.indices.clone(
+    {
+      index: BACKUP_INDEX,
+      target: ELASTICSEARCH_INDEX_NAME
+    },
+    {
+      meta: true
+    }
+  )
 
   await client.indices.putSettings(
     {
@@ -144,5 +164,10 @@ export const down = async (db: Db, _client: MongoClient) => {
     }
   )
 
-  await client.indices.delete({ index: `${ELASTICSEARCH_INDEX_NAME}-*` })
+  await client.indices.delete(
+    { index: `${ELASTICSEARCH_INDEX_NAME}-*` },
+    {
+      meta: true
+    }
+  )
 }
