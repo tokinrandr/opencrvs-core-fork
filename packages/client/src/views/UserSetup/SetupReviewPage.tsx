@@ -39,6 +39,7 @@ import {
 import { activateUserMutation } from '@client/views/UserSetup/queries'
 import { messages } from '@client/i18n/messages/views/userSetup'
 import { Content } from '@opencrvs/components/lib/Content'
+
 import { getLanguage } from '@client/i18n/selectors'
 import { ErrorText } from '@opencrvs/components/lib/'
 import { getUserRole } from '@client/utils'
