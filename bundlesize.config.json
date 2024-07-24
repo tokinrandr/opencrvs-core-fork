@@ -1,0 +1,12 @@
+{
+  "files": [
+    {
+      "path": "packages/client/build/static/js/*.chunk.js",
+      "maxSize": "2MB"
+    },
+    {
+      "path": "packages/login/build/static/js/*.chunk.js",
+      "maxSize": "600KB"
+    }
+  ]
+}

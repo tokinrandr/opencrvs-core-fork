@@ -1,0 +1,106 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# OpenCRVS is also distributed under the terms of the Civil Registration
+# & Healthcare Disclaimer located at http://opencrvs.org/license.
+#
+# Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
+version: '3.3'
+
+services:
+  # Expose dev secrets as a plain volume - these will use docker secrets in staging and prod
+  auth:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+      - '.secrets/private-key.pem:/secrets/private-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+      - CERT_PRIVATE_KEY_PATH=/secrets/private-key.pem
+    ports:
+      - '4040:4040'
+
+  user-mgnt:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+      - HOST=0.0.0.0
+    ports:
+      - '3030:3030'
+
+  webhooks:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+      - HOST=0.0.0.0
+    ports:
+      - '2525:2525'
+
+  notification:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+    ports:
+      - '2020:2020'
+
+  gateway:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+    ports:
+      - '7070:7070'
+
+  workflow:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+    ports:
+      - '5050:5050'
+
+  search:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+    ports:
+      - '9090:9090'
+
+  countryconfig:
+    image: opencrvs/ocrvs-farajaland:latest
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+      - MONGO_URL=mongodb://mongo1/user-mgnt
+      - NODE_ENV=development
+      - FHIR_URL=http://hearth:3447/fhir
+      - AUTH_URL=http://auth:4040
+      - CONFIRM_REGISTRATION_URL=http://workflow:5050/confirm/registration
+      - CHECK_INVALID_TOKEN=true
+    ports:
+      - '3040:3040'
+
+  metrics:
+    volumes:
+      - '.secrets/public-key.pem:/secrets/public-key.pem'
+    environment:
+      - CERT_PUBLIC_KEY_PATH=/secrets/public-key.pem
+    ports:
+      - '1050:1050'
+
+  client:
+    ports:
+      - '3000:80'
+
+  login:
+    ports:
+      - '3020:80'
+
+  config:
+    ports:
+      - '2021:2021'

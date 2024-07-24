@@ -1,0 +1,57 @@
+{
+  "name": "@opencrvs/migration",
+  "version": "1.5.0",
+  "description": "OpenCRVS migration microservice",
+  "homepage": "https://github.com/opencrvs/opencrvs-core#readme",
+  "type": "module",
+  "license": "MPL-2.0",
+  "scripts": {
+    "start": "yarn build && ./run-migrations.sh",
+    "revert": "./revert-migrations.sh",
+    "start:prod": "./run-migrations.sh",
+    "create:hearth": "./create-migrations.sh hearth",
+    "create:openhim": "./create-migrations.sh openhim",
+    "create:performance": "./create-migrations.sh performance",
+    "create:user-mgnt": "./create-migrations.sh user-mgnt",
+    "create:application-config": "./create-migrations.sh application-config",
+    "status:hearth": "migrate-mongo status -f ./src/migrate-mongo-config-hearth.js",
+    "status:openhim": "migrate-mongo status -f ./src/migrate-mongo-config-openhim.js",
+    "status:user-mgnt": "migrate-mongo status -f ./src/migrate-mongo-config-user-mgnt.js",
+    "status:application-config": "migrate-mongo status -f ./src/migrate-mongo-config-application-config.js",
+    "precommit": "lint-staged",
+    "test:compilation": "tsc --noEmit",
+    "build": "rimraf build && tsc"
+  },
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.2",
+    "@types/lodash-es": "^4.17.0",
+    "@types/uuid": "^3.4.3",
+    "@elastic/elasticsearch": "7.17.13",
+    "bcryptjs": "^2.4.3",
+    "file-type": "^16.5.3",
+    "date-fns": "^2.28.0",
+    "influx": "^5.0.7",
+    "is-svg": "^4.3.2",
+    "lodash-es": "^4.17.21",
+    "migrate-mongo": "^10.0.0",
+    "minio": "^7.0.33",
+    "mongoose": "^6.11.3",
+    "uuid": "^3.2.1"
+  },
+  "devDependencies": {
+    "@types/fhir": "0.0.30",
+    "mongodb": "^4.17.1",
+    "prettier": "^2.5.0",
+    "rimraf": "^5.0.0",
+    "typescript": "4.9.5"
+  },
+  "lint-staged": {
+    "src/**/*.{ts}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "migration",
+    "nodejs"
+  ]
+}

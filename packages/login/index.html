@@ -1,0 +1,104 @@
+<!--This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
+OpenCRVS is also distributed under the terms of the Civil Registration
+& Healthcare Disclaimer located at http://opencrvs.org/license.
+
+Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta name="theme-color" content="#4c68c1" />
+
+    <!--
+    Inject configuration values from public/config.js into window
+    replace this file to change runtime configuration
+  -->
+    <script src="%VITE_APP_COUNTRY_CONFIG_URL%/login-config.js"></script>
+    <link rel="shortcut icon" href="/favicon.ico" />
+    <!--
+      Unlike "/favicon.ico" or "favicon.ico", "/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>Loading...</title>
+
+    <style>
+      body,
+      html {
+        background-color: #f5f5f5;
+      }
+      #spinner {
+        opacity: 0;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-25px, -25px);
+        animation: a 2s forwards;
+      }
+      #spinner g {
+        transform-origin: center;
+        animation: b 2s linear infinite;
+      }
+      #spinner g circle {
+        stroke-linecap: round;
+        animation: c 1.5s ease-in-out infinite;
+      }
+      @keyframes a {
+        85% {
+          opacity: 0;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
+      @keyframes b {
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      @keyframes c {
+        0% {
+          stroke-dasharray: 0 150;
+          stroke-dashoffset: 0;
+        }
+        47.5% {
+          stroke-dasharray: 42 150;
+          stroke-dashoffset: -16;
+        }
+        95%,
+        100% {
+          stroke-dasharray: 42 150;
+          stroke-dashoffset: -59;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <div id="root">
+      <svg
+        id="spinner"
+        width="50"
+        height="50"
+        stroke="#4C68C1"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <g>
+          <circle cx="12" cy="12" r="9.5" fill="none" stroke-width="2"></circle>
+        </g>
+      </svg>
+    </div>
+    <script type="module" src="/src/index.tsx"></script>
+  </body>
+</html>

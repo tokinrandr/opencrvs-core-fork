@@ -1,0 +1,215 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# OpenCRVS is also distributed under the terms of the Civil Registration
+# & Healthcare Disclaimer located at http://opencrvs.org/license.
+#
+# Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
+version: '3.3'
+
+services:
+  client:
+    image: opencrvs/ocrvs-client:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/client/Dockerfile
+    restart: unless-stopped
+
+  dashboards:
+    image: opencrvs/ocrvs-dashboards:${VERSION}
+    build:
+      context: ./packages/dashboards
+      dockerfile: ./Dockerfile
+    restart: unless-stopped
+
+  components:
+    image: opencrvs/ocrvs-components:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/components/Dockerfile
+    restart: unless-stopped
+  login:
+    image: opencrvs/ocrvs-login:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/login/Dockerfile
+    restart: unless-stopped
+  gateway:
+    image: opencrvs/ocrvs-gateway:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/gateway/Dockerfile
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - CONFIG_SMS_CODE_EXPIRY_SECONDS=600
+      - CONFIG_TOKEN_EXPIRY_SECONDS=604800
+      - NODE_ENV=development
+      - FHIR_URL=http://hearth:3447/fhir
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030/
+      - SEARCH_URL=http://search:9090/
+      - METRICS_URL=http://metrics:1050
+      - AUTH_URL=http://auth:4040
+      - COUNTRY_CONFIG_URL=http://countryconfig:3040
+      - NOTIFICATION_URL=http://notification:2020/
+      - WORKFLOW_URL=http://workflow:5050/
+      - APPLICATION_CONFIG_URL=http://config:2021/
+      - WEBHOOKS_URL=http://webhooks:2525/
+      - CHECK_INVALID_TOKEN=true
+      - MINIO_BUCKET=ocrvs
+      - DOCUMENTS_URL=http://documents:9050
+  # User facing services
+  workflow:
+    image: opencrvs/ocrvs-workflow:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/workflow/Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - SEARCH_URL=http://search:9090/
+      - METRICS_URL=http://metrics:1050
+      - DOCUMENTS_URL=http://documents:9050
+      - NOTIFICATION_SERVICE_URL=http://notification:2020/
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030/
+      - COUNTRY_CONFIG_URL=http://countryconfig:3040
+      - FHIR_URL=http://hearth:3447/fhir
+      - WEBHOOKS_URL=http://webhooks:2525/
+      - APPLICATION_CONFIG_URL=http://config:2021/
+      - COUNTRY=${COUNTRY:-bgd} # PEN_TEST change to gbr
+  search:
+    image: opencrvs/ocrvs-search:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/search/Dockerfile
+    restart: unless-stopped
+    environment:
+      - HEARTH_MONGO_URL=mongodb://mongo1/hearth-dev
+      - NODE_ENV=development
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030/
+      - ES_HOST=elasticsearch:9200
+      - FHIR_URL=http://hearth:3447/fhir
+  metrics:
+    image: opencrvs/ocrvs-metrics:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/metrics/Dockerfile
+    restart: unless-stopped
+    environment:
+      - INFLUX_HOST=influxdb
+      - INFLUX_PORT=8086
+      - INFLUX_DB=ocrvs
+      - COUNTRY_CONFIG_URL=http://countryconfig:3040/
+      - CONFIG_API_URL=http://config:2021
+      - MONGO_URL=mongodb://mongo1/metrics
+      - HEARTH_MONGO_URL=mongodb://mongo1/hearth-dev
+      - DASHBOARD_MONGO_URL=mongodb://mongo1/performance
+      - SEARCH_URL=http://search:9090/
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030
+      - DOCUMENTS_URL=http://documents:9050
+      - FHIR_URL=http://hearth:3447/fhir
+  # END User facing services
+  scheduler:
+    image: opencrvs/ocrvs-scheduler:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/scheduler/Dockerfile
+    environment:
+      - NODE_ENV=development
+      - METRICS_URL=http://metrics:1050
+      - OPENHIM_MONGO_URL=mongodb://mongo1/openhim-dev
+  auth:
+    image: opencrvs/ocrvs-auth:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/auth/Dockerfile
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030/
+      - CONFIG_TOKEN_EXPIRY_SECONDS=604800
+      - CONFIG_SMS_CODE_EXPIRY_SECONDS=600
+      - NOTIFICATION_SERVICE_URL=http://notification:2020/
+      - METRICS_URL=http://metrics:1050
+  user-mgnt:
+    image: opencrvs/ocrvs-user-mgnt:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/user-mgnt/Dockerfile
+    restart: unless-stopped
+    environment:
+      - MONGO_URL=mongodb://mongo1/user-mgnt
+      - NOTIFICATION_SERVICE_URL=http://notification:2020/
+      - HOST=0.0.0.0
+      - METRICS_URL=http://metrics:1050
+      - FHIR_URL=http://hearth:3447/fhir
+  webhooks:
+    image: opencrvs/ocrvs-webhooks:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/webhooks/Dockerfile
+    restart: unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - MONGO_URL=mongodb://mongo1/webhooks
+      - AUTH_URL=http://auth:4040
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030/
+      - HOST=0.0.0.0
+      - CHECK_INVALID_TOKEN=true
+      - FHIR_URL=http://hearth:3447/fhir
+  notification:
+    image: opencrvs/ocrvs-notification:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/notification/Dockerfile
+    restart: unless-stopped
+    environment:
+      - COUNTRY=${COUNTRY:-bgd}
+      - HOST=0.0.0.0
+      - COUNTRY_CONFIG_URL=http://countryconfig:3040
+  config:
+    image: opencrvs/ocrvs-config:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/config/Dockerfile
+    restart: unless-stopped
+    environment:
+      - AUTH_URL=http://auth:4040
+      - COUNTRY_CONFIG_URL=http://countryconfig:3040
+      - HOST=0.0.0.0
+      - PORT=2021
+      - MONGO_URL=mongodb://mongo1/application-config
+      - SEARCH_URL=http://search:9090/
+      - METRICS_URL=http://metrics:1050
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030/
+      - FHIR_URL=http://hearth:3447/fhir
+      - GATEWAY_URL=http://gateway:7070/
+      - DOCUMENTS_URL=http://documents:9050
+      - CHECK_INVALID_TOKEN=true
+  migration:
+    image: opencrvs/ocrvs-migration:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/migration/Dockerfile
+    restart: unless-stopped
+    environment:
+      - USER_MGNT_MONGO_URL=mongodb://mongo1/user-mgnt
+      - APPLICATION_CONFIG_MONGO_URL=mongodb://mongo1/application-config
+      - HEARTH_MONGO_URL=mongodb://mongo1/hearth-dev
+      - DASHBOARD_MONGO_URL=mongodb://mongo1/performance
+      - OPENHIM_MONGO_URL=mongodb://mongo1/openhim-dev
+      - ES_HOST=elasticsearch:9200
+      - INFLUX_HOST=influxdb
+      - INFLUX_PORT=8086
+      - INFLUX_DB=ocrvs
+      - WAIT_HOSTS=mongo1:27017,influxdb:8086,minio:9000,elasticsearch:9200
+  documents:
+    image: opencrvs/ocrvs-documents:${VERSION}
+    build:
+      context: .
+      dockerfile: ./packages/documents/Dockerfile
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - COUNTRY_CONFIG_URL=http://countryconfig:3040

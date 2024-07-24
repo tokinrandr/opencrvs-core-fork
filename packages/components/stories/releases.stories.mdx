@@ -1,0 +1,83 @@
+import { Meta, DocsContainer } from '@storybook/addon-docs'
+import { Pill } from '@opencrvs/components/lib/Pill'
+import { Stack } from '@opencrvs/components/lib/Stack'
+import { Text } from '@opencrvs/components/lib/Text'
+import { ThemeProvider } from 'styled-components'
+import { getTheme } from '@opencrvs/components/lib/theme'
+
+export const ReleasePill = ({ date, version }) => (
+  <>
+    <br />
+    <Stack gap={16}>
+      <Text variant="bold16" element="span">
+        {date}
+      </Text>
+      <Pill label={'v ' + version} type="default" size="small" />
+    </Stack>
+  </>
+)
+
+<Meta
+  title="Releases"
+  parameters={{
+    docsCss: {
+      maxWidth: '640px'
+    }
+  }}
+/>
+
+# Releases
+
+{/* https://gitmoji.dev/ Emoji convention */}
+
+<ReleasePill date="July 2024" version="1.5.0" />
+
+- 💄 Update **Accordion** with an active style by @jpye-finch
+- 💄 Update **Checkbox**, **DateField**, **InputField**, **PasswordInput**, **TextArea**, **TextInput** and **TimeField** general looks by @jpye-finch
+- 💄 Update multiple components spacings by @jpye-finch
+- ♻️ Refactor a lot of components from class to functional components by @Eezi
+
+<ReleasePill date="September 2023" version="1.3.0" />
+
+- ✨ Create [ListConfig](?path=/docs/data-list-config--docs) to replace ListViewSimplified
+- ✨ Create [BreadCrumb](?path=/docs/input-breadcrumb--default)
+- ✨ Allow adding custom icon to [Alert](?path=/docs/data-alert--success)
+- ✨ Allow forcing underline in [Link](?path=/docs/controls-link--default)
+- 💄 Update [Icon](?path=/docs/data-icon--default) using `phosphor-react`
+- 💄 Update [Checkbox](?path=/docs/input-checkbox--default) design and styles
+- ✨ Create [VerificationButton](?path=/docs/controls-verification-button--default)
+- ✨ Allow disabling [Select](?path=/docs/input-select--default) options
+
+<ReleasePill date="December 2022" version="1.2.0" />
+
+- ✨ Add accessibility tab to Storybook canvas
+- ✨ Add Skip to content -link to [Frame](?path=/docs/layout-frame--page-template-content-large)
+- ✨ Create [Accordion](?path=/docs/data-accordion--accordion-view)
+- ✨ Create [Icon](?path=/docs/data-icon--default) using `react-feather`
+- ✨ Create [Link](?path=/docs/controls-link--default)
+- ✨ Create [CopyButton](?path=/docs/controls-copy-button--default)
+- ♻️ Refactor components using `LinkButton` to use `Link`
+- ♻️ Update Workqueue to use [Button](?path=/docs/controls-button--button) instead of deprecated buttons
+- 💄 Update [Button](?path=/docs/controls-button--button) hover and focus styles for accessibility
+- 💄 Update [Side navigation](?path=/docs/layout-side-navigation-side-navigation--left-navigation-view) focus styles for accessibility
+- 💄 Update [Toast](?path=/docs/data-toast--success) layout
+- 🐛 Bug fix React unique key problems in [Pagination](?path=/docs/controls-pagination--pagination-view) and AppHeader (deprecated)
+- 🐛 Fix FormTabs jumping on hover
+
+<ReleasePill date="September 2022" version="1.1.0" />
+
+- 🎉 First release of OpenUi-Kit
+- Add component status page
+- Add colours and typography documentation
+- Refactor [Alert](?path=/docs/data-alert--success)
+- Refactor headers into [AppBar](?path=/docs/layout-appbar--default)
+- Refactor buttons into [Button](?path=/docs/controls-button--button)
+- Refactor [Pagination](?path=/docs/controls-pagination--pagination-view)
+- Refactor [Table](?path=/docs/data-table--one-column-one-row)
+- Refactor [Toast](?path=/docs/data-toast--success)
+- Refactor [Summary](?path=/docs/data-summary--row)
+- Refactor [Workqueue](?path=/docs/data-workqueue--default)
+- Create [Frame](?path=/docs/layout-frame--page-template-content-large)
+- Create [Divider](?path=/docs/layout-divider--template)
+- Create [Text](?path=/docs/typography-text--default)
+- Create [Stack](?path=/docs/layout-stack--default)
