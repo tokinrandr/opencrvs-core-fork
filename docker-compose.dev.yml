@@ -71,7 +71,7 @@ services:
       - '9090:9090'
 
   countryconfig:
-    image: opencrvs/ocrvs-farajaland:latest
+    image: ecrvs/ocrvs-farajaland:latest
     volumes:
       - '.secrets/public-key.pem:/secrets/public-key.pem'
     environment:

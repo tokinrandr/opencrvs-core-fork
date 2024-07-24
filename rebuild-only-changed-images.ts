@@ -98,7 +98,7 @@ async function run() {
     const service = compose.services[serviceName]
     const { image } = service
     const repository = image.split(':')[0]
-    const imageName = repository.replace('opencrvs/ocrvs-', '')
+    const imageName = repository.replace('ecrvs/ocrvs-', '')
     return IMAGE_NAME_TO_PACKAGE_NAME[imageName] || imageName
   }
   const serviceNames = Object.keys(compose.services)
