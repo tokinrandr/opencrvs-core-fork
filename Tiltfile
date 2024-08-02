@@ -29,10 +29,11 @@ docker_build("opencrvs/ocrvs-workflow:dev", "packages/workflow")
 
 # Create namespace
 namespace_create('opencrvs-deps-dev')
+namespace_create('opencrvs-services-dev')
 
 # Create auth keys in k8s
-secret_create_generic('private-key', from_file='.secrets/private-key.pem')
-configmap_create('public-key', from_file=['.secrets/public-key.pem'])
+secret_create_generic('private-key', from_file='.secrets/private-key.pem', namespace="opencrvs-services-dev")
+configmap_create('public-key', from_file=['.secrets/public-key.pem'], namespace="opencrvs-services-dev")
 
 # Deploy dependencies with Helm
 k8s_yaml(helm('kubernetes/dependencies',
