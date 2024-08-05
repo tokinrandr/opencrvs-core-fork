@@ -6,25 +6,33 @@ load('ext://namespace', 'namespace_create', 'namespace_inject')
 # Only use for local dev with docker desktop
 allow_k8s_contexts('docker-desktop')
 
+
 # Build baseimage
 docker_build("opencrvs/ocrvs-base", ".", dockerfile="packages/Dockerfile.base")
 
 # Build services
-docker_build("opencrvs/ocrvs-auth:dev", "packages/auth")
-docker_build("opencrvs/ocrvs-client:dev", "packages", dockerfile="packages/client/Dockerfile")
-docker_build("opencrvs/ocrvs-config:dev", "packages/config")
-docker_build("opencrvs/ocrvs-dashboards:dev", "packages/dashboards")
-docker_build("opencrvs/ocrvs-documents:dev", "packages/documents")
-docker_build("opencrvs/ocrvs-gateway:dev", "packages/gateway")
-docker_build("opencrvs/ocrvs-login:dev",  "packages", dockerfile="packages/login/Dockerfile")
-docker_build("opencrvs/ocrvs-metrics:dev", "packages/metrics")
-docker_build("opencrvs/ocrvs-migration:dev", "packages/migration")
-docker_build("opencrvs/ocrvs-notification:dev", "packages/notification")
-docker_build("opencrvs/ocrvs-scheduler:dev", "packages/scheduler")
-docker_build("opencrvs/ocrvs-search:dev", "packages/search")
-docker_build("opencrvs/ocrvs-user-mgnt:dev", "packages/user-mgnt")
-docker_build("opencrvs/ocrvs-webhooks:dev", "packages/webhooks")
-docker_build("opencrvs/ocrvs-workflow:dev", "packages/workflow")
+docker_build("opencrvs/ocrvs-client:local", "packages", dockerfile="packages/client/Dockerfile")
+docker_build("opencrvs/ocrvs-login:local",  "packages", dockerfile="packages/login/Dockerfile")
+
+apps = ['auth', 
+              'config',
+              'dashboards', 
+              'documents', 
+              'gateway',  
+              'metrics', 
+              'migration', 
+              'notification', 
+              'scheduler', 
+              'search', 
+              'user-mgnt', 
+              'webhooks', 
+              'workflow']
+
+def build_services():
+  for app in apps:
+    docker_build("opencrvs/ocrvs-{}:local".format(app), "packages/{}".format(app))
+
+build_services()
 
 
 # Create namespace
@@ -48,3 +56,10 @@ k8s_yaml(helm('kubernetes/opencrvs-services',
               values=['kubernetes/opencrvs-services/values.yaml', 
                       'kubernetes/opencrvs-services/values-dev.yaml']))
 
+
+#def wait_for_builds():
+#  for app in apps:
+#    resources_to_be_waited = 
+#    k8s_resource(app, resource_deps=["opencrvs/ocrvs-{}:local".format(app))
+
+#wait_for_builds()
