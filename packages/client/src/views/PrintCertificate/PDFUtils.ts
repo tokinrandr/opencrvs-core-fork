@@ -157,10 +157,10 @@ export function executeHandlebarsTemplate(
           return v1 > v2 ? options.fn(this) : options.inverse(this)
         case '>=':
           return v1 >= v2 ? options.fn(this) : options.inverse(this)
-        case '&&':
-          return v1 && v2 ? options.fn(this) : options.inverse(this)
+        case 'AND':
+          return !!v1 && !!v2 ? options.fn(this) : options.inverse(this)
         case '||':
-          return v1 || v2 ? options.fn(this) : options.inverse(this)
+          return !!v1 || !!v2 ? options.fn(this) : options.inverse(this)
         default:
           return options.inverse(this)
       }
@@ -219,11 +219,12 @@ export function addFontsToSvg(
     .flatMap(([font, families]) =>
       Object.entries(families).map(
         ([family, url]) => `
-@font-face {
-font-family: "${font}";
-font-weight: ${family};
-src: url("${url}") format("truetype");
-}`
+          @font-face {
+            font-family: "${font}";
+            font-weight: ${family};
+            src: url("${url}") format("truetype");
+          }
+        `
       )
     )
     .join('')
@@ -262,7 +263,6 @@ export async function getPDFTemplateWithSVG(
   const svgTemplate =
     offlineResource.templates.certificates![declaration.event]?.definition ||
     EMPTY_STRING
-
   const resolvedSignatures = await Promise.all(
     MARRIAGE_SIGNATURE_KEYS.map((k) => ({
       signatureKey: k,
@@ -329,3 +329,58 @@ export function downloadFile(
   downloadLink.setAttribute('download', fileName)
   downloadLink.click()
 }
+
+function insertTspansIntoText(
+  this: any,
+  textLines: string[],
+  startX: number,
+  startY: number
+) {
+  const LINE_HEIGHT = 18
+  let svgString = ''
+  let y = startY
+  for (const line of textLines) {
+    svgString += `<tspan x="${startX}" y="${y}">${line}</tspan>`
+    y += LINE_HEIGHT
+  }
+  return svgString
+}
+
+Handlebars.registerHelper(
+  'wrap',
+  function (
+    this: any,
+    value: string,
+    maxCharacters = 0,
+    startX: number,
+    staryY: number
+  ) {
+    const words = value
+      .split('\\n')
+      .map((word) => word.trim())
+      .filter(Boolean)
+    let lines = words
+    if (maxCharacters) {
+      lines = words
+        .reduce<string[]>(
+          (lines, word) => {
+            const lastIndex = lines.length - 1
+            if (lines[lastIndex].length + word.length < maxCharacters) {
+              lines[lastIndex] = lines[lastIndex].concat(` ${word}`)
+            } else {
+              lines.push(word)
+            }
+            return lines
+          },
+          ['']
+        )
+        .filter(Boolean)
+        .map((line) => {
+          const template = Handlebars.compile(line)
+          const compiledValue = template(this)
+          return compiledValue
+        })
+    }
+    return insertTspansIntoText(lines, startX, staryY)
+  }
+)
