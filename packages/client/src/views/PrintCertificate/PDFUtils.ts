@@ -263,6 +263,7 @@ export async function getPDFTemplateWithSVG(
   const svgTemplate =
     offlineResource.templates.certificates![declaration.event]?.definition ||
     EMPTY_STRING
+
   const resolvedSignatures = await Promise.all(
     MARRIAGE_SIGNATURE_KEYS.map((k) => ({
       signatureKey: k,
@@ -306,9 +307,8 @@ export async function getPDFTemplateWithSVG(
   if (widthValue && heightValue) {
     const width = Number.parseInt(widthValue)
     const height = Number.parseInt(heightValue)
-    if (width > height) {
-      pdfTemplate.definition.pageOrientation = 'landscape'
-    }
+    pdfTemplate.definition.pageOrientation =
+      width > height ? 'landscape' : 'portrait'
   }
 
   pdfTemplate.definition.content = {
@@ -340,7 +340,26 @@ function insertTspansIntoText(
   let svgString = ''
   let y = startY
   for (const line of textLines) {
-    svgString += `<tspan x="${startX}" y="${y}">${line}</tspan>`
+    const textLinesCompiled = line
+      .split(' ')
+      .map((x) => {
+        // ;b; means this word fontweight is bold
+        if (x.includes(';b;')) {
+          x = x.split(';b;')[1]
+          x = `<tspan font-weight="600">${x}</tspan>`
+          // ;b; means this word fontweight is normal
+        } else if (x.includes(';n;')) {
+          x = x.split(';n;')[1]
+          x = `<tspan font-weight="400">${x}</tspan>`
+          // ;b; means this word fontweight is normal, has special use case whether
+          // to print N/A or empty string in `thisOrNextValue` helper from config
+        } else if (x.includes(';;')) {
+          x = x.split(';;')[1]
+        }
+        return x
+      })
+      .join(' ')
+    svgString += `<tspan x="${startX}" y="${y}">${textLinesCompiled}</tspan>`
     y += LINE_HEIGHT
   }
   return svgString
@@ -355,8 +374,10 @@ Handlebars.registerHelper(
     startX: number,
     staryY: number
   ) {
-    const words = value
-      .split('\\n')
+    const template = Handlebars.compile(value)
+    const compiledValue = template(this)
+    const words = compiledValue
+      .split(' ')
       .map((word) => word.trim())
       .filter(Boolean)
     let lines = words
@@ -375,11 +396,6 @@ Handlebars.registerHelper(
           ['']
         )
         .filter(Boolean)
-        .map((line) => {
-          const template = Handlebars.compile(line)
-          const compiledValue = template(this)
-          return compiledValue
-        })
     }
     return insertTspansIntoText(lines, startX, staryY)
   }
