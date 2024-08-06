@@ -10,33 +10,33 @@ version: '3.3'
 
 services:
   client:
-    image: opencrvs/ocrvs-client:${VERSION}
+    image: ecrvs/ocrvs-client:${VERSION}
     build:
       context: .
       dockerfile: ./packages/client/Dockerfile
     restart: unless-stopped
 
   dashboards:
-    image: opencrvs/ocrvs-dashboards:${VERSION}
+    image: ecrvs/ocrvs-dashboards:${VERSION}
     build:
       context: ./packages/dashboards
       dockerfile: ./Dockerfile
     restart: unless-stopped
 
   components:
-    image: opencrvs/ocrvs-components:${VERSION}
+    image: ecrvs/ocrvs-components:${VERSION}
     build:
       context: .
       dockerfile: ./packages/components/Dockerfile
     restart: unless-stopped
   login:
-    image: opencrvs/ocrvs-login:${VERSION}
+    image: ecrvs/ocrvs-login:${VERSION}
     build:
       context: .
       dockerfile: ./packages/login/Dockerfile
     restart: unless-stopped
   gateway:
-    image: opencrvs/ocrvs-gateway:${VERSION}
+    image: ecrvs/ocrvs-gateway:${VERSION}
     build:
       context: .
       dockerfile: ./packages/gateway/Dockerfile
@@ -61,7 +61,7 @@ services:
       - DOCUMENTS_URL=http://documents:9050
   # User facing services
   workflow:
-    image: opencrvs/ocrvs-workflow:${VERSION}
+    image: ecrvs/ocrvs-workflow:${VERSION}
     build:
       context: .
       dockerfile: ./packages/workflow/Dockerfile
@@ -79,7 +79,7 @@ services:
       - APPLICATION_CONFIG_URL=http://config:2021/
       - COUNTRY=${COUNTRY:-bgd} # PEN_TEST change to gbr
   search:
-    image: opencrvs/ocrvs-search:${VERSION}
+    image: ecrvs/ocrvs-search:${VERSION}
     build:
       context: .
       dockerfile: ./packages/search/Dockerfile
@@ -91,7 +91,7 @@ services:
       - ES_HOST=elasticsearch:9200
       - FHIR_URL=http://hearth:3447/fhir
   metrics:
-    image: opencrvs/ocrvs-metrics:${VERSION}
+    image: ecrvs/ocrvs-metrics:${VERSION}
     build:
       context: .
       dockerfile: ./packages/metrics/Dockerfile
@@ -111,7 +111,7 @@ services:
       - FHIR_URL=http://hearth:3447/fhir
   # END User facing services
   scheduler:
-    image: opencrvs/ocrvs-scheduler:${VERSION}
+    image: ecrvs/ocrvs-scheduler:${VERSION}
     build:
       context: .
       dockerfile: ./packages/scheduler/Dockerfile
@@ -120,7 +120,7 @@ services:
       - METRICS_URL=http://metrics:1050
       - OPENHIM_MONGO_URL=mongodb://mongo1/openhim-dev
   auth:
-    image: opencrvs/ocrvs-auth:${VERSION}
+    image: ecrvs/ocrvs-auth:${VERSION}
     build:
       context: .
       dockerfile: ./packages/auth/Dockerfile
@@ -133,7 +133,7 @@ services:
       - NOTIFICATION_SERVICE_URL=http://notification:2020/
       - METRICS_URL=http://metrics:1050
   user-mgnt:
-    image: opencrvs/ocrvs-user-mgnt:${VERSION}
+    image: ecrvs/ocrvs-user-mgnt:${VERSION}
     build:
       context: .
       dockerfile: ./packages/user-mgnt/Dockerfile
@@ -145,7 +145,7 @@ services:
       - METRICS_URL=http://metrics:1050
       - FHIR_URL=http://hearth:3447/fhir
   webhooks:
-    image: opencrvs/ocrvs-webhooks:${VERSION}
+    image: ecrvs/ocrvs-webhooks:${VERSION}
     build:
       context: .
       dockerfile: ./packages/webhooks/Dockerfile
@@ -159,7 +159,7 @@ services:
       - CHECK_INVALID_TOKEN=true
       - FHIR_URL=http://hearth:3447/fhir
   notification:
-    image: opencrvs/ocrvs-notification:${VERSION}
+    image: ecrvs/ocrvs-notification:${VERSION}
     build:
       context: .
       dockerfile: ./packages/notification/Dockerfile
@@ -169,7 +169,7 @@ services:
       - HOST=0.0.0.0
       - COUNTRY_CONFIG_URL=http://countryconfig:3040
   config:
-    image: opencrvs/ocrvs-config:${VERSION}
+    image: ecrvs/ocrvs-config:${VERSION}
     build:
       context: .
       dockerfile: ./packages/config/Dockerfile
@@ -188,7 +188,7 @@ services:
       - DOCUMENTS_URL=http://documents:9050
       - CHECK_INVALID_TOKEN=true
   migration:
-    image: opencrvs/ocrvs-migration:${VERSION}
+    image: ecrvs/ocrvs-migration:${VERSION}
     build:
       context: .
       dockerfile: ./packages/migration/Dockerfile
@@ -205,7 +205,7 @@ services:
       - INFLUX_DB=ocrvs
       - WAIT_HOSTS=mongo1:27017,influxdb:8086,minio:9000,elasticsearch:9200
   documents:
-    image: opencrvs/ocrvs-documents:${VERSION}
+    image: ecrvs/ocrvs-documents:${VERSION}
     build:
       context: .
       dockerfile: ./packages/documents/Dockerfile

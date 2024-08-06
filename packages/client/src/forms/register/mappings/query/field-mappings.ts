@@ -1095,9 +1095,8 @@ export const nationalityTransformer = (
     if (!transformedData[sectionId]) {
       transformedData[sectionId] = {}
     }
-    const nationalityName = countryAlpha3toAlpha2(
+    const nationalityName =
       queryData[sectionId][field.name] && queryData[sectionId][field.name][0]
-    )
     transformedData[sectionId][field.name] = nationalityName || 'UNKNOWN'
   }
 }

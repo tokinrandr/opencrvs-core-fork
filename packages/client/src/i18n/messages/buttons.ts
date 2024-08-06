@@ -21,6 +21,12 @@ interface IButtonsMessages
   confirm: MessageDescriptor
   configure: MessageDescriptor
   continueButton: MessageDescriptor
+  fullBirthCertCopy: MessageDescriptor
+  shortBirthCertCopy: MessageDescriptor
+  fullDeathCertCopy: MessageDescriptor
+  shortDeathCertCopy: MessageDescriptor
+  fullMarraigeCertCopy: MessageDescriptor
+  shortMarraigeCertCopy: MessageDescriptor
   createUser: MessageDescriptor
   create: MessageDescriptor
   deactivate: MessageDescriptor
@@ -129,7 +135,36 @@ const messagesToDefine: IButtonsMessages = {
     description: 'Continue Button Text',
     id: 'buttons.continue'
   },
-
+  fullBirthCertCopy: {
+    defaultMessage: 'Full copy of birth',
+    description: 'Full copy of birth Button Text',
+    id: 'buttons.fullBirthCertCopy'
+  },
+  shortBirthCertCopy: {
+    defaultMessage: 'Birth act',
+    description: 'Short copy of birth Button Text',
+    id: 'buttons.shortBirthCertCopy'
+  },
+  fullDeathCertCopy: {
+    defaultMessage: 'Full copy of death',
+    description: 'Full copy of death Button Text',
+    id: 'buttons.fullDeathCertCopy'
+  },
+  shortDeathCertCopy: {
+    defaultMessage: 'Birth act',
+    description: 'Short copy of death Button Text',
+    id: 'buttons.shortDeathCertCopy'
+  },
+  fullMarraigeCertCopy: {
+    defaultMessage: 'Full copy of marraige',
+    description: 'Full copy of marraige Button Text',
+    id: 'buttons.fullMarraigeCertCopy'
+  },
+  shortMarraigeCertCopy: {
+    defaultMessage: 'Birth act',
+    description: 'Short copy of marraige Button Text',
+    id: 'buttons.shortMarraigeCertCopy'
+  },
   create: {
     defaultMessage: 'Create',
     description: 'Label for submit button of client integration creation form',

@@ -157,10 +157,10 @@ export function executeHandlebarsTemplate(
           return v1 > v2 ? options.fn(this) : options.inverse(this)
         case '>=':
           return v1 >= v2 ? options.fn(this) : options.inverse(this)
-        case '&&':
-          return v1 && v2 ? options.fn(this) : options.inverse(this)
+        case 'AND':
+          return !!v1 && !!v2 ? options.fn(this) : options.inverse(this)
         case '||':
-          return v1 || v2 ? options.fn(this) : options.inverse(this)
+          return !!v1 || !!v2 ? options.fn(this) : options.inverse(this)
         default:
           return options.inverse(this)
       }
@@ -219,11 +219,12 @@ export function addFontsToSvg(
     .flatMap(([font, families]) =>
       Object.entries(families).map(
         ([family, url]) => `
-@font-face {
-font-family: "${font}";
-font-weight: ${family};
-src: url("${url}") format("truetype");
-}`
+          @font-face {
+            font-family: "${font}";
+            font-weight: ${family};
+            src: url("${url}") format("truetype");
+          }
+        `
       )
     )
     .join('')
@@ -306,9 +307,8 @@ export async function getPDFTemplateWithSVG(
   if (widthValue && heightValue) {
     const width = Number.parseInt(widthValue)
     const height = Number.parseInt(heightValue)
-    if (width > height) {
-      pdfTemplate.definition.pageOrientation = 'landscape'
-    }
+    pdfTemplate.definition.pageOrientation =
+      width > height ? 'landscape' : 'portrait'
   }
 
   pdfTemplate.definition.content = {
@@ -329,3 +329,74 @@ export function downloadFile(
   downloadLink.setAttribute('download', fileName)
   downloadLink.click()
 }
+
+function insertTspansIntoText(
+  this: any,
+  textLines: string[],
+  startX: number,
+  startY: number
+) {
+  const LINE_HEIGHT = 18
+  let svgString = ''
+  let y = startY
+  for (const line of textLines) {
+    const textLinesCompiled = line
+      .split(' ')
+      .map((x) => {
+        // ;b; means this word fontweight is bold
+        if (x.includes(';b;')) {
+          x = x.split(';b;')[1]
+          x = `<tspan font-weight="600">${x}</tspan>`
+          // ;b; means this word fontweight is normal
+        } else if (x.includes(';n;')) {
+          x = x.split(';n;')[1]
+          x = `<tspan font-weight="400">${x}</tspan>`
+          // ;b; means this word fontweight is normal, has special use case whether
+          // to print N/A or empty string in `thisOrNextValue` helper from config
+        } else if (x.includes(';;')) {
+          x = x.split(';;')[1]
+        }
+        return x
+      })
+      .join(' ')
+    svgString += `<tspan x="${startX}" y="${y}">${textLinesCompiled}</tspan>`
+    y += LINE_HEIGHT
+  }
+  return svgString
+}
+
+Handlebars.registerHelper(
+  'wrap',
+  function (
+    this: any,
+    value: string,
+    maxCharacters = 0,
+    startX: number,
+    staryY: number
+  ) {
+    const template = Handlebars.compile(value)
+    const compiledValue = template(this)
+    const words = compiledValue
+      .split(' ')
+      .map((word) => word.trim())
+      .filter(Boolean)
+    let lines = words
+    if (maxCharacters) {
+      lines = words
+        .reduce<string[]>(
+          (lines, word) => {
+            const lastIndex = lines.length - 1
+            if (lines[lastIndex].length + word.length < maxCharacters) {
+              lines[lastIndex] = lines[lastIndex].concat(` ${word}`)
+            } else {
+              lines.push(word)
+            }
+            return lines
+          },
+          ['']
+        )
+        .filter(Boolean)
+    }
+    return insertTspansIntoText(lines, startX, staryY)
+  }
+)
