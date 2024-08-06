@@ -75,11 +75,17 @@ import { IOfflineData } from '@client/offline/reducer'
 import { WORKQUEUE_TABS } from '@client/components/interface/Navigation'
 import { getUserDetails } from '@client/profile/profileSelectors'
 import { getRegisteringOfficeId } from '@client/utils/draftUtils'
+import { UserDetails } from '@client/utils/userUtils'
 
 const ErrorWrapper = styled.div`
   margin-top: -3px;
   margin-bottom: 16px;
 `
+
+const CERTIFICATE_TYPE = {
+  SHORT: 'short',
+  FULL: 'full'
+}
 
 type PropsWhenDeclarationIsFound = {
   registerForm: IForm
@@ -90,6 +96,7 @@ type PropsWhenDeclarationIsFound = {
   formSection: IFormSection
   formGroup: IFormSectionGroup
   offlineCountryConfiguration: IOfflineData
+  userDetails: UserDetails | null
 }
 type PropsWhenDeclarationIsNotFound = {
   declaration: undefined
@@ -218,7 +225,7 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
     })
   }
 
-  continueButtonHandler = (
+  fullCertButtonHandler = (
     declarationId: string,
     currentGroup: string,
     nextGroup: string | undefined,
@@ -248,6 +255,92 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
 
       return
     }
+    draft.data.template.certificateType = CERTIFICATE_TYPE.FULL
+    const { userDetails } = this.props as PropsWhenDeclarationIsFound
+    draft.data.template.systemRole =
+      userDetails?.role.labels.find((x) => x.label === 'Registrar')?.label || ''
+    if (currentGroup === 'affidavit') {
+      if (
+        collector.affidavitFile &&
+        (collector.affidavitFile as IFormSectionData).data
+      ) {
+        this.props.writeDeclaration(draft)
+        this.goToNextFormForSomeoneElse(declarationId, draft, event)
+
+        return
+      }
+      if (
+        !(
+          collector.noAffidavitAgreement &&
+          (collector.noAffidavitAgreement as string[]).length > 0
+        )
+      ) {
+        this.setState({
+          showError: true
+        })
+
+        return
+      }
+
+      this.props.writeDeclaration(draft)
+      this.setState({ showModalForNoSignedAffidavit: true })
+
+      return
+    }
+
+    this.setState({
+      showError: false,
+      showModalForNoSignedAffidavit: false
+    })
+    if (!nextGroup) {
+      this.props.writeDeclaration(draft)
+
+      if (isCertificateForPrintInAdvance(draft)) {
+        this.props.goToReviewCertificate(declarationId, event)
+      } else {
+        this.props.goToVerifyCollector(
+          declarationId,
+          event,
+          collector.type as string
+        )
+      }
+    } else {
+      this.props.goToPrintCertificate(declarationId, event, nextGroup)
+    }
+  }
+
+  shortCertButtonHandler = (
+    declarationId: string,
+    currentGroup: string,
+    nextGroup: string | undefined,
+    event: Event,
+    sectionId: keyof IPrintableDeclaration['data'],
+    fields: IFormField[],
+    draft: IPrintableDeclaration | undefined
+  ) => {
+    if (!draft) return
+    console.log(draft)
+
+    const errors = getErrorsOnFieldsBySection(sectionId, fields, draft)
+    const errorValues = Object.values(errors).map(Object.values)
+    const errLength = flatten(errorValues).filter(
+      (errs) => errs.length > 0
+    ).length
+
+    const certificates = draft.data.registration.certificates
+    const certificate = (certificates && certificates[0]) || {}
+    const collector = certificate[
+      sectionId as keyof typeof certificate
+    ] as IFormSectionData
+
+    if (errLength > 0) {
+      this.setState({
+        showError: true
+      })
+
+      return
+    }
+    draft.data.template.certificateType = CERTIFICATE_TYPE.SHORT
 
     if (currentGroup === 'affidavit') {
       if (
@@ -356,6 +449,20 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
       formGroup,
       declaration
     )
+
+    const shortCertButton =
+      event == Event.Birth
+        ? buttonMessages.shortBirthCertCopy
+        : Event.Death
+        ? buttonMessages.shortDeathCertCopy
+        : buttonMessages.shortMarraigeCertCopy
+
+    const fullCertButton =
+      event == Event.Birth
+        ? buttonMessages.fullBirthCertCopy
+        : Event.Death
+        ? buttonMessages.fullDeathCertCopy
+        : buttonMessages.fullMarraigeCertCopy
     return (
       <>
         <ActionPageLight
@@ -395,10 +502,10 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
               draftData={declarationToBeCertified.data}
               onUploadingStateChanged={this.onUploadingStateChanged}
             />
-            <PrimaryButton
+            <TertiaryButton
               id="confirm_form"
               onClick={() => {
-                this.continueButtonHandler(
+                this.fullCertButtonHandler(
                   declarationToBeCertified.id,
                   formGroup.id,
                   nextSectionGroup ? nextSectionGroup.groupId : undefined,
@@ -410,8 +517,26 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
               }}
               disabled={this.state.isFileUploading}
             >
-              {intl.formatMessage(buttonMessages.continueButton)}
-            </PrimaryButton>
+              {intl.formatMessage(fullCertButton)}
+            </TertiaryButton>
+            <TertiaryButton
+              // id="confirm_form"
+              // hidden={event == 'death'}
+              onClick={() => {
+                this.shortCertButtonHandler(
+                  declarationToBeCertified.id,
+                  formGroup.id,
+                  nextSectionGroup ? nextSectionGroup.groupId : undefined,
+                  event,
+                  formSection.id,
+                  formGroup.fields,
+                  declarationToBeCertified
+                )
+              }}
+              disabled={this.state.isFileUploading}
+            >
+              {intl.formatMessage(shortCertButton)}
+            </TertiaryButton>
           </Content>
         </ActionPageLight>
         {showModalForNoSignedAffidavit && (
@@ -533,7 +658,8 @@ const mapStateToProps = (
       ...formGroup,
       fields
     },
-    offlineCountryConfiguration: getOfflineData(state)
+    offlineCountryConfiguration: getOfflineData(state),
+    userDetails
   }
 }
 
