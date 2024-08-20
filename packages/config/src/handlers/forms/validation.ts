@@ -237,6 +237,8 @@ const OPTIONAL_FIELDS_IN_SECTION: Record<string, string[] | undefined> = {
     'attendantAtBirth',
     'birthType',
     'weightAtBirth',
+    'iD',
+    'childNidVerification',
     ...OPTIONAL_EVENT_ADDRESS_FIELDS.map((field) => `${field}Placeofbirth`)
   ],
   mother: [
