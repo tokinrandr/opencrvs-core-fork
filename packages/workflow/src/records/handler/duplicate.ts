@@ -16,6 +16,7 @@ import { validateRequest } from '@workflow/utils/index'
 import { toDuplicated } from '@workflow/records/state-transitions'
 import { auditEvent } from '@workflow/records/audit'
 import { getRecordById } from '@workflow/records/index'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 const requestSchema = z.object({
   reason: z.string().optional(),
@@ -49,6 +50,7 @@ export async function duplicateRecordHandler(
   )
 
   await auditEvent('marked-as-duplicate', duplicatedRecord, token)
+  triggerWebhooks({ record, action: 'marked-as-duplicate', token })
 
   return duplicatedRecord
 }

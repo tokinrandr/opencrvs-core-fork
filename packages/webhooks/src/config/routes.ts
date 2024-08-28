@@ -17,10 +17,9 @@ import {
   deleteWebhookByClientIdHandler
 } from '@webhooks/features/manage/handler'
 import {
-  birthRegisteredHandler,
-  deathRegisteredHandler,
-  marriageRegisteredHandler
-} from '@webhooks/features/event/handler'
+  triggerWebhooksHandler,
+  triggerWebhooksSchema
+} from '@webhooks/features/trigger/handler'
 
 export const getRoutes = () => {
   const routes = [
@@ -81,29 +80,14 @@ export const getRoutes = () => {
     },
     {
       method: 'POST',
-      path: '/events/birth/mark-registered',
-      handler: birthRegisteredHandler,
+      path: '/trigger',
+      handler: triggerWebhooksHandler,
       config: {
         tags: ['api'],
-        description: 'Dispatches a webhook for the birth registration event'
-      }
-    },
-    {
-      method: 'POST',
-      path: '/events/death/mark-registered',
-      handler: deathRegisteredHandler,
-      config: {
-        tags: ['api'],
-        description: 'Dispatches a webhook for the death registration event'
-      }
-    },
-    {
-      method: 'POST',
-      path: '/events/marriage/mark-registered',
-      handler: marriageRegisteredHandler,
-      config: {
-        tags: ['api'],
-        description: 'Dispatches a webhook for the marriage registration event'
+        description: 'Dispatches webhooks for a specific record',
+        validate: {
+          query: triggerWebhooksSchema
+        }
       }
     }
   ]

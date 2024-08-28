@@ -13,6 +13,7 @@ HEARTH_CONFIG=./build/dist/src/migrate-mongo-config-hearth.js
 OPENHIM_CONFIG=./build/dist/src/migrate-mongo-config-openhim.js
 APP_CONFIG=./build/dist/src/migrate-mongo-config-application-config.js
 USER_MGNT_CONFIG=./build/dist/src/migrate-mongo-config-user-mgnt.js
+WEBHOOKS_CONFIG=./build/dist/src/migrate-mongo-config-webhooks.js
 
 SCRIPT_PATH=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 
@@ -43,3 +44,10 @@ for ((n=0;n<$USER_MGNT_FILES;n++)); do
   yarn --cwd $SCRIPT_PATH migrate-mongo down --file $USER_MGNT_CONFIG
 done
 yarn --cwd $SCRIPT_PATH migrate-mongo status --file $USER_MGNT_CONFIG
+
+## Revert webhooks migration
+WEBHOOKS_FILES=$(ls ./build/dist/src/migrations/webhooks | wc -l)
+for ((n=0;n<$WEBHOOKS_FILES;n++)); do
+  yarn --cwd $SCRIPT_PATH migrate-mongo down --file $WEBHOOKS_CONFIG
+done
+yarn --cwd $SCRIPT_PATH migrate-mongo status --file $WEBHOOKS_CONFIG

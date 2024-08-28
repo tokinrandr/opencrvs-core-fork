@@ -58,6 +58,11 @@ export function getEventLabelFromBundle(bundle: Bundle) {
   }
 }
 
+export function getEventType(bundle: SavedBundle) {
+  const task = getTaskFromSavedBundle(bundle)
+  return task.code.coding[0].code as EVENT_TYPE
+}
+
 type RecordBase = Bundle
 
 export type ReadyForReviewRecord = Nominal<SavedBundle, 'ReadyForReview'>
@@ -145,9 +150,10 @@ export type StateIdenfitiers = {
   ARCHIVED: ArchivedRecord
 }
 
+/** no-op: only used to help with type inference */
 export function changeState<R extends Bundle, A extends keyof StateIdenfitiers>(
   record: R,
-  nextState: A | A[]
+  _nextState: A | A[]
 ) {
   return record as any as StateIdenfitiers[A]
 }

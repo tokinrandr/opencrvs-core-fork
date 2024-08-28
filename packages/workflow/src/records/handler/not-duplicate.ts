@@ -15,6 +15,7 @@ import { getRecordById } from '@workflow/records/index'
 import { indexBundleToRoute } from '@workflow/records/search'
 import { auditEvent } from '@workflow/records/audit'
 import { toNotDuplicated } from '@workflow/records/state-transitions'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export async function markAsNotDuplicateHandler(
   request: Hapi.Request,
@@ -33,6 +34,7 @@ export async function markAsNotDuplicateHandler(
 
   await indexBundleToRoute(notDuplicateBundle, token, '/events/not-duplicate')
   await auditEvent('not-duplicate', notDuplicateBundle, token)
+  triggerWebhooks({ record, action: 'not-duplicate', token })
 
   return notDuplicateBundle
 }

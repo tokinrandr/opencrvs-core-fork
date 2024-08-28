@@ -70,6 +70,7 @@ import {
   toWaitingForExternalValidationState
 } from '@workflow/records/state-transitions'
 import { logger } from '@opencrvs/commons'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 const requestSchema = z.object({
   event: z.custom<EVENT_TYPE>(),
@@ -278,9 +279,11 @@ export default async function createRecordHandler(
   } else if (hasValidateScope(request)) {
     record = await toValidated(record, token)
     await auditEvent('sent-for-approval', record, token)
+    triggerWebhooks({ record, action: 'sent-for-approval', token })
   } else if (hasRegisterScope(request) && !isInProgress(record)) {
     record = await toWaitingForExternalValidationState(record, token)
     await auditEvent('waiting-external-validation', record, token)
+    triggerWebhooks({ record, action: 'waiting-external-validation', token })
   }
   const eventAction = getEventAction(record)
   await indexBundle(record, token)
@@ -308,6 +311,7 @@ export default async function createRecordHandler(
     if (isRejected(rejectedOrWaitingValidationRecord)) {
       await indexBundle(rejectedOrWaitingValidationRecord, token)
       await auditEvent('sent-for-updates', record, token)
+      triggerWebhooks({ record, action: 'sent-for-updates', token })
     }
   }
 

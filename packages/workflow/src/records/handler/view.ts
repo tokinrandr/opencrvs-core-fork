@@ -15,6 +15,7 @@ import { Bundle } from '@opencrvs/commons/types'
 import { toViewed } from '@workflow/records/state-transitions'
 import { sendBundleToHearth } from '@workflow/records/fhir'
 import { auditEvent } from '@workflow/records/audit'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export async function viewRecordHandler(
   request: Hapi.Request,
@@ -33,6 +34,7 @@ export async function viewRecordHandler(
 
   await sendBundleToHearth(viewedRecordWithTaskOnly)
   await auditEvent('viewed', viewedRecord, token)
+  triggerWebhooks({ record, action: 'viewed', token })
 
   return viewedRecord
 }

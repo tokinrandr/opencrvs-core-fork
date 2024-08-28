@@ -9,43 +9,45 @@
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
 import fetch from 'node-fetch'
-import { EVENT_TYPE, RegisteredRecord } from '@opencrvs/commons/types'
+import { ValidRecord } from '@opencrvs/commons/types'
 import { WEBHOOKS_URL } from '@workflow/constants'
+import { RecordEvent } from '@opencrvs/commons/record-events'
+import { logger } from '@opencrvs/commons'
 
-const WEBHOOK_URLS = {
-  [EVENT_TYPE.BIRTH]: new URL('/events/birth/mark-registered', WEBHOOKS_URL),
-  [EVENT_TYPE.DEATH]: new URL('/events/death/mark-registered', WEBHOOKS_URL),
-  [EVENT_TYPE.MARRIAGE]: new URL(
-    '/events/marriage/mark-registered',
-    WEBHOOKS_URL
-  )
-} satisfies Record<EVENT_TYPE, URL>
-
-export const invokeWebhooks = async ({
-  bundle,
-  token,
-  event
+export const triggerWebhooks = async ({
+  record,
+  action,
+  token
 }: {
-  bundle: RegisteredRecord
+  record: ValidRecord
+  action: RecordEvent
   token: string
-  event: EVENT_TYPE
 }) => {
-  const request = await fetch(WEBHOOK_URLS[event], {
-    method: 'POST',
-    body: JSON.stringify(bundle),
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    }
-  })
+  logger.info(
+    `Triggering webhook for ${action} for ${
+      record.id ? `saved record ${record.id}` : `unsaved record`
+    }`
+  )
 
-  if (!request.ok) {
+  const response = await fetch(
+    new URL(`/trigger?action=${action}`, WEBHOOKS_URL),
+    {
+      method: 'POST',
+      body: JSON.stringify(record),
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      }
+    }
+  )
+
+  if (!response.ok) {
     throw new Error(
       `Dispatching webhook failed with [${
-        request.status
-      }] body: ${await request.text()}`
+        response.status
+      }] body: ${await response.text()}`
     )
   }
 
-  return request
+  return response
 }

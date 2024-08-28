@@ -15,7 +15,7 @@ import { indexBundle } from '@workflow/records/search'
 import { findTaskHistories } from '@opencrvs/commons/types'
 import { createRoute } from '@workflow/states'
 import { auditEvent } from '@workflow/records/audit'
-
+import { triggerWebhooks } from '@workflow/records/webhooks'
 export const reinstateRoute = createRoute({
   method: 'POST',
   path: '/records/{recordId}/reinstate',
@@ -49,6 +49,7 @@ export const reinstateRoute = createRoute({
 
     await indexBundle(reinstatedRecord, token)
     await auditEvent('reinstated', reinstatedRecord, token)
+    triggerWebhooks({ record, action: 'reinstated', token })
 
     return reinstatedRecord
   }

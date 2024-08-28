@@ -11,7 +11,8 @@
 import {
   EVENT_TYPE,
   ValidRecord,
-  SearchDocument
+  SearchDocument,
+  getEventType
 } from '@opencrvs/commons/types'
 import { OPENCRVS_INDEX_NAME } from '@search/constants'
 import { client } from '@search/elasticsearch/client'
@@ -21,7 +22,6 @@ import { composeDocument as composeBirthDocument } from '@search/features/regist
 import { composeDocument as composeDeathDocument } from '@search/features/registration/death/service'
 import { composeDocument as composeMarriageDocument } from '@search/features/registration/marriage/service'
 import { logger } from '@opencrvs/commons'
-import { getEventType } from '@search/utils/event'
 import { Transform } from 'stream'
 import { orderBy } from 'lodash'
 import { format } from 'date-fns'

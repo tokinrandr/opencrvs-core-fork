@@ -12,7 +12,8 @@
     "./authentication": "./build/dist/authentication.js",
     "./http": "./build/dist/http.js",
     "./fixtures": "./build/dist/fixtures.js",
-    "./assignment": "./build/dist/assignment.js"
+    "./assignment": "./build/dist/assignment.js",
+    "./record-events": "./build/dist/record-events.js"
   },
   "scripts": {
     "start": "yarn build:watch",

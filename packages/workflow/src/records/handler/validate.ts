@@ -15,6 +15,7 @@ import { toValidated } from '@workflow/records/state-transitions'
 import { auditEvent } from '@workflow/records/audit'
 import { validateRequest } from '@workflow/utils/index'
 import * as z from 'zod'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export const validateRoute = createRoute({
   method: 'POST',
@@ -41,6 +42,7 @@ export const validateRoute = createRoute({
 
     await indexBundle(validatedRecord, token)
     await auditEvent('sent-for-approval', validatedRecord, token)
+    triggerWebhooks({ record, action: 'sent-for-approval', token })
 
     return validatedRecord
   }

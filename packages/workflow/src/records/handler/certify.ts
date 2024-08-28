@@ -18,6 +18,7 @@ import { uploadCertificateAttachmentsToDocumentsStore } from '@workflow/document
 import { getAuthHeader } from '@opencrvs/commons/http'
 import { indexBundle } from '@workflow/records/search'
 import { auditEvent } from '@workflow/records/audit'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export const certifyRoute = createRoute({
   method: 'POST',
@@ -45,6 +46,7 @@ export const certifyRoute = createRoute({
 
     await indexBundle(certifiedRecord, token)
     await auditEvent('certified', certifiedRecord, token)
+    triggerWebhooks({ record, action: 'certified', token })
 
     return certifiedRecord
   }

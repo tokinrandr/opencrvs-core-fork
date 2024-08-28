@@ -21,7 +21,7 @@ import {
 import getPlugins from '@webhooks/config/plugins'
 import * as database from '@webhooks/database'
 import { readFileSync } from 'fs'
-import { validateFunc } from '@opencrvs/commons'
+import { logger, validateFunc } from '@opencrvs/commons'
 import { getRoutes } from '@webhooks/config/routes'
 import * as queue from '@webhooks/queue'
 
@@ -54,6 +54,14 @@ export async function createServer() {
 
   const routes = getRoutes()
   server.route(routes)
+
+  server.ext('onPreResponse', (request, reply) => {
+    if ('isBoom' in request.response) {
+      logger.error(request.response)
+    }
+
+    return reply.continue
+  })
 
   server.ext({
     type: 'onRequest',

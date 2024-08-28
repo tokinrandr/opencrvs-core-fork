@@ -38,5 +38,9 @@ yarn --cwd $SCRIPT_PATH migrate-mongo status --file $USER_MGNT_CONFIG
 yarn --cwd $SCRIPT_PATH migrate-mongo up --file $PERFORMANCE_CONFIG
 yarn --cwd $SCRIPT_PATH migrate-mongo status --file $PERFORMANCE_CONFIG
 
+# webhooks migration
+yarn --cwd $SCRIPT_PATH migrate-mongo up --file $WEBHOOKS_CONFIG
+yarn --cwd $SCRIPT_PATH migrate-mongo status --file $WEBHOOKS_CONFIG
+
 # search migration / reindex
 yarn --cwd $SCRIPT_PATH reindex-search

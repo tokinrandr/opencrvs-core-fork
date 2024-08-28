@@ -26,6 +26,7 @@ import { indexBundleToRoute } from '@workflow/records/search'
 import { auditEvent } from '@workflow/records/audit'
 import { findAssignment } from '@opencrvs/commons/assignment'
 import { getUserOrSystem } from '@workflow/records/user'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 function getDownloadedOrAssignedExtension(
   authHeader: IAuthHeader,
@@ -98,6 +99,11 @@ export async function downloadRecordHandler(
       // Here the sent bundle is saved with task only
       await sendBundleToHearth(downloadedRecordWithTaskOnly)
       await auditEvent(auditRecordEvent, downloadedRecord, token)
+      triggerWebhooks({
+        record: downloadedRecord,
+        action: auditRecordEvent,
+        token
+      })
 
       if (
         extensionUrl !== 'http://opencrvs.org/specs/extension/regDownloaded'

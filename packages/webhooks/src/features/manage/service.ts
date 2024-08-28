@@ -90,5 +90,9 @@ export async function getSystem(
 }
 
 export function generateChallenge() {
+  if (process.env.NODE_ENV !== 'production') {
+    return 'challenge'
+  }
+
   return crypto.randomBytes(16).toString('base64').toString()
 }

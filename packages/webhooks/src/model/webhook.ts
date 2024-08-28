@@ -8,51 +8,28 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
+import { EVENT_TYPE } from '@opencrvs/commons/types'
+import { ActionIdentifier, ACTIONS } from '@opencrvs/commons/state-transitions'
 import { model, Schema, Document } from 'mongoose'
-
-export enum TRIGGERS {
-  BIRTH_REGISTERED,
-  DEATH_REGISTERED,
-  BIRTH_CERTIFIED,
-  DEATH_CERTIFIED,
-  BIRTH_CORRECTED,
-  DEATH_CORRECTED
-}
-export interface IClient {
-  client_id: string
-  type: string
-  username: string
-  name: string
-}
 
 export interface IWebhook {
   webhookId: string
   address: string
-  createdBy: IClient
-  createdAt?: number | string
-  sha_secret: string
-  trigger: string
+  createdBy: string
+  createdAt: number
+  action: ActionIdentifier
+  event: EVENT_TYPE
 }
-
-export const ClientSchema = new Schema(
-  {
-    client_id: String,
-    type: String,
-    username: String,
-    name: String
-  },
-  { _id: false }
-)
 
 export interface IWebhookModel extends IWebhook, Document {}
 
 const webhookSchema = new Schema({
   webhookId: { type: String, required: true },
   address: { type: String, required: true },
-  createdBy: { type: ClientSchema, required: true },
+  createdBy: { type: String, required: true },
   createdAt: { type: Number, default: Date.now },
-  sha_secret: { type: String, required: true },
-  trigger: { type: String, required: true }
+  action: { type: String, required: true, enum: ACTIONS },
+  event: { type: String, required: true, enum: Object.values(EVENT_TYPE) }
 })
 
 export default model<IWebhookModel>('Webhook', webhookSchema)

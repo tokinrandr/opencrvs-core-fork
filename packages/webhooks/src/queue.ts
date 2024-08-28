@@ -53,9 +53,7 @@ async function removeJob(myQueue: Queue, id: string) {
 
 export function initQueue(): Queue {
   const connection = getRedis()
-  logger.info(
-    `Initialising queue on REDIS_HOST: ${REDIS_HOST} with connection: ${connection}`
-  )
+  logger.info(`Initialising queue on REDIS_HOST: ${REDIS_HOST}`)
   const newQueue = new Queue(QUEUE_NAME, {
     connection
   })

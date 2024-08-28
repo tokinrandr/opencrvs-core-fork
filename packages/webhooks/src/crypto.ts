@@ -8,18 +8,13 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-
-import {
-  EVENT_TYPE,
-  getTaskFromSavedBundle,
-  SavedBundle
-} from '@opencrvs/commons/types'
-
-export function getEventType(bundle: SavedBundle) {
-  const task = getTaskFromSavedBundle(bundle)
-  if (!task) {
-    throw new Error('No task found')
-  }
-  const type = task.code!.coding![0].code as EVENT_TYPE
-  return type
+import crypto from 'crypto'
+export function createRequestSignature(
+  requestSigningVersion: string,
+  signingSecret: string,
+  rawBody: string
+) {
+  const hmac = crypto.createHmac(requestSigningVersion, signingSecret)
+  hmac.update(`${requestSigningVersion}:${encodeURIComponent(rawBody)}`)
+  return `${requestSigningVersion}=${hmac.digest('hex')}`
 }

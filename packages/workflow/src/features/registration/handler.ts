@@ -19,8 +19,8 @@ import {
   isNotificationEnabled,
   sendNotification
 } from '@workflow/records/notification'
-import { invokeWebhooks } from '@workflow/records/webhooks'
 import { SupportedPatientIdentifierCode } from '@opencrvs/commons/types'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export interface EventRegistrationPayload {
   trackingId: string
@@ -66,12 +66,11 @@ export async function markEventAsRegisteredCallbackHandler(
 
   await indexBundle(bundle, token)
   await auditEvent('registered', bundle, token)
+  triggerWebhooks({ record: bundle, action: 'registered', token })
 
   if (await isNotificationEnabled('registered', event, token)) {
     await sendNotification('registered', bundle, token)
   }
-
-  await invokeWebhooks({ bundle, token, event })
 
   return h.response(bundle).code(200)
 }

@@ -13,8 +13,7 @@ import { indexRecord as upsertDeathEvent } from '@search/features/registration/d
 import { indexRecord as upsertMarriageEvent } from '@search/features/registration/marriage/service'
 
 import * as Hapi from '@hapi/hapi'
-import { ValidRecord } from '@opencrvs/commons/types'
-import { getEventType } from '@search/utils/event'
+import { ValidRecord, getEventType } from '@opencrvs/commons/types'
 
 export async function recordHandler(
   request: Hapi.Request,

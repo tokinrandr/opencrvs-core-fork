@@ -20,6 +20,7 @@ import { auditEvent } from '@workflow/records/audit'
 import { getTokenPayload } from '@opencrvs/commons/authentication'
 import { getUserOrSystemByCriteria } from '@workflow/records/user'
 import { findAssignment } from '@opencrvs/commons/assignment'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export async function unassignRecordHandler(
   request: Hapi.Request,
@@ -72,6 +73,7 @@ export async function unassignRecordHandler(
   await sendBundleToHearth(unassignedRecordWithTaskOnly)
   await indexBundleToRoute(unassignedRecord, token, '/events/unassigned')
   await auditEvent('unassigned', unassignedRecord, token)
+  triggerWebhooks({ record, action: 'unassigned', token })
 
   return unassignedRecord
 }

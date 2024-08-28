@@ -15,6 +15,7 @@ import { toArchived } from '@workflow/records/state-transitions'
 import { indexBundle } from '@workflow/records/search'
 import { createRoute } from '@workflow/states'
 import { auditEvent } from '@workflow/records/audit'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 const requestSchema = z.object({
   reason: z.string().optional(),
@@ -44,6 +45,8 @@ export const archiveRoute = createRoute({
 
     await indexBundle(archivedRecord, token)
     await auditEvent('archived', archivedRecord, token)
+    triggerWebhooks({ record, action: 'archived', token })
+
     return archivedRecord
   }
 })

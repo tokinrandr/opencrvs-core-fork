@@ -19,6 +19,7 @@ import { auditEvent } from '@workflow/records/audit'
 import { isRejected } from '@opencrvs/commons/types'
 import { validateRequest } from '@workflow/utils/index'
 import * as z from 'zod'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export const registerRoute = createRoute({
   method: 'POST',
@@ -51,6 +52,7 @@ export const registerRoute = createRoute({
       recordInWaitingValidationState,
       token
     )
+    triggerWebhooks({ record, action: 'waiting-external-validation', token })
 
     const rejectedOrWaitingValidationRecord = await initiateRegistration(
       recordInWaitingValidationState,
@@ -61,6 +63,7 @@ export const registerRoute = createRoute({
     if (isRejected(rejectedOrWaitingValidationRecord)) {
       await indexBundle(rejectedOrWaitingValidationRecord, token)
       await auditEvent('sent-for-updates', record, token)
+      triggerWebhooks({ record, action: 'sent-for-updates', token })
     }
 
     return rejectedOrWaitingValidationRecord

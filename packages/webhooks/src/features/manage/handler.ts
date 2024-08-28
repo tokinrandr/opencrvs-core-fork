@@ -17,17 +17,36 @@ import {
   ITokenPayload,
   generateChallenge
 } from '@webhooks/features/manage/service'
-import { internal } from '@hapi/boom'
-import Webhook, { TRIGGERS } from '@webhooks/model/webhook'
+import Webhook from '@webhooks/model/webhook'
 import { logger } from '@opencrvs/commons'
+import { ActionIdentifier, ACTIONS } from '@opencrvs/commons/state-transitions'
 import * as uuid from 'uuid/v4'
 import fetch from 'node-fetch'
 import { resolve } from 'url'
+import { EVENT_TYPE } from '@webhooks/../../commons/build/dist/record'
+
+const actionAndEventToTopic = (action: ActionIdentifier, event: EVENT_TYPE) => {
+  return `http://opencrvs.org/specs/webhooks/${event}/${action}`
+}
+
+const ALL_TOPICS = Object.values(EVENT_TYPE).flatMap((event) =>
+  Object.values(ACTIONS).map((action) => actionAndEventToTopic(action, event))
+)
+
+type Topic = `http://opencrvs.org/specs/webhooks/${string}/${string}`
+
+const topicToActionAndEvent = (topic: Topic) => {
+  const topicParts = topic.split('/')
+  return {
+    action: topicParts.at(-1)!,
+    event: topicParts.at(-2)!
+  }
+}
 
 interface IHub {
   callback: string
   mode: string
-  topic: string
+  topic: Topic
   secret: string
 }
 
@@ -35,12 +54,17 @@ interface ISubscribePayload {
   hub: IHub
 }
 
+/**
+ * Subscribe to a webhook. The responses are based on [WebSub spec](https://www.w3.org/TR/websub/)
+ */
 export async function subscribeWebhooksHandler(
   request: Hapi.Request,
   h: Hapi.ResponseToolkit
 ) {
   const { hub } = request.payload as ISubscribePayload
-  if (!TRIGGERS[TRIGGERS[hub.topic]]) {
+  const { action, event } = topicToActionAndEvent(hub.topic)
+
+  if (!ALL_TOPICS.includes(hub.topic)) {
     return h
       .response({
         hub: {
@@ -51,126 +75,103 @@ export async function subscribeWebhooksHandler(
       })
       .code(400)
   }
-  const token: ITokenPayload = getTokenPayload(
-    request.headers.authorization.split(' ')[1]
-  )
+
+  const token = getTokenPayload(request.headers.authorization.split(' ')[1])
   const systemId = token.sub
 
-  try {
-    const system: ISystem = await getSystem(
-      { systemId },
-      request.headers.authorization
-    )
-    if (!system || system.status !== 'active') {
-      return h
-        .response({
-          hub: {
-            mode: 'denied',
-            topic: hub.topic,
-            reason:
-              'Active system details cannot be found.  This system is no longer authorized'
-          }
-        })
-        .code(400)
-    }
-
-    if (hub.secret !== system.sha_secret) {
-      return h
-        .response({
-          hub: {
-            mode: 'denied',
-            topic: hub.topic,
-            reason: 'hub.secret is incorrect'
-          }
-        })
-        .code(400)
-    }
-
-    if (hub.mode !== 'subscribe') {
-      return h
-        .response({
-          hub: {
-            mode: 'denied',
-            topic: hub.topic,
-            reason: 'hub.mode must be set to subscribe'
-          }
-        })
-        .code(400)
-    }
-    const webhookId = uuid()
-    const createdBy = {
-      client_id: system.client_id,
-      name: system.name,
-      type: getScopeType(system.scope),
-      username: system.username
-    }
-    const webhook = {
-      webhookId,
-      createdBy,
-      address: hub.callback,
-      sha_secret: hub.secret,
-      trigger: TRIGGERS[TRIGGERS[hub.topic]]
-    }
-    const challenge = generateChallenge()
-
-    if (!(system.scope.indexOf('demo') > -1)) {
-      try {
-        const challengeCheck = await fetch(
-          resolve(
-            hub.callback,
-            `?mode=subscribe&challenge=${encodeURIComponent(challenge)}&topic=${
-              hub.topic
-            }`
-          ),
-          {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json'
-            }
-          }
-        )
-          .then((response) => {
-            return response.json()
-          })
-          .catch((error) => {
-            return Promise.reject(
-              new Error(` request failed: ${error.message}`)
-            )
-          })
-        if (challenge !== challengeCheck.challenge) {
-          throw new Error(
-            `${challenge} is not equal to ${challengeCheck.challenge}.  Subscription endpoint check failed`
-          )
+  const system: ISystem = await getSystem(
+    { systemId },
+    request.headers.authorization
+  )
+  if (!system || system.status !== 'active') {
+    return h
+      .response({
+        hub: {
+          mode: 'denied',
+          topic: hub.topic,
+          reason:
+            'Active system details cannot be found.  This system is no longer authorized'
         }
-        await Webhook.create(webhook)
-        return h.response().code(202)
-      } catch (err) {
-        logger.error(err)
-        return h.response('Subscription callback check failed').code(400)
-      }
-    } else {
-      try {
-        await Webhook.create(webhook)
-        return h.response().code(202)
-      } catch (err) {
-        throw new Error(`Cannot save webhook in development: ${err}`)
+      })
+      .code(400)
+  }
+
+  if (hub.secret !== system.sha_secret) {
+    return h
+      .response({
+        hub: {
+          mode: 'denied',
+          topic: hub.topic,
+          reason: 'hub.secret is incorrect'
+        }
+      })
+      .code(400)
+  }
+
+  if (hub.mode !== 'subscribe') {
+    return h
+      .response({
+        hub: {
+          mode: 'denied',
+          topic: hub.topic,
+          reason: 'hub.mode must be set to subscribe'
+        }
+      })
+      .code(400)
+  }
+  const webhookId = uuid()
+  const challenge = generateChallenge()
+
+  // The purpose of a challenge check is to verify you own the URL
+  const challengeCheck = await fetch(
+    resolve(
+      hub.callback,
+      `?mode=subscribe&challenge=${encodeURIComponent(challenge)}&topic=${
+        hub.topic
+      }`
+    ),
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json'
       }
     }
-  } catch (err) {
-    logger.error(err)
-    return h.response().code(400)
+  )
+
+  if (challengeCheck.status !== 200) {
+    logger.error(
+      `Challenge endpoint returned non 200 status code: ${await challengeCheck.text()}`
+    )
+
+    return h
+      .response(`Challenge was not equal. Subscription endpoint check failed`)
+      .code(400)
   }
+
+  const response = await challengeCheck.text()
+
+  if (challenge !== response) {
+    logger.error(
+      `${challenge} is not equal to ${response}. Subscription endpoint check failed`
+    )
+    return h
+      .response(`Challenge was not equal. Subscription endpoint check failed`)
+      .code(400)
+  }
+
+  const webhook = {
+    id: webhookId,
+    createdBy: system.client_id,
+    address: hub.callback,
+    action,
+    event
+  }
+
+  await Webhook.create(webhook)
+
+  return h.response(challenge).code(200)
 }
 
-const getScopeType = (scopes: string[]) => {
-  const isWebhookUser = scopes.includes('webhook')
-  const isNationalIDAPIUser = scopes.includes('nationalId')
-  return isWebhookUser
-    ? 'webhook'
-    : isNationalIDAPIUser
-    ? 'nationalId'
-    : 'health'
-}
 export const reqSubscribeWebhookSchema = Joi.object({
   hub: Joi.object({
     callback: Joi.string(),
@@ -188,45 +189,39 @@ export async function listWebhooksHandler(
     request.headers.authorization.split(' ')[1]
   )
   const systemId = token.sub
-  try {
-    const system: ISystem = await getSystem(
-      { systemId },
-      request.headers.authorization
-    )
-    if (!system || system.status !== 'active') {
-      return h
-        .response(
-          'Active system details cannot be found.  This system is no longer authorized'
-        )
-        .code(400)
-    }
-    try {
-      const entries = await Webhook.find({
-        'createdBy.client_id': system.client_id
-      }).sort({
-        createdAt: 'asc'
-      })
+  const system: ISystem = await getSystem(
+    { systemId },
+    request.headers.authorization
+  )
 
-      const sortedEntries: any = []
-      entries.forEach((item) => {
-        const entry = {
-          id: item.webhookId,
-          callback: item.address,
-          createdAt: new Date((item.createdAt as number) * 1000).toISOString(),
-          createdBy: item.createdBy,
-          topic: item.trigger
-        }
-        sortedEntries.push(entry)
-      })
-      return h.response({ entries: sortedEntries }).code(200)
-    } catch (err) {
-      logger.error(err)
-      throw internal()
-    }
-  } catch (err) {
-    logger.error(err)
-    return h.response().code(400)
+  if (!system || system.status !== 'active') {
+    return h
+      .response(
+        'Active system details cannot be found.  This system is no longer authorized'
+      )
+      .code(400)
   }
+
+  const webhooks = await Webhook.find({
+    createdBy: system.client_id
+  }).sort({
+    createdAt: 'asc'
+  })
+
+  const entries = webhooks.map((webhook) => ({
+    id: webhook.id,
+    callback: webhook.address,
+    createdAt: new Date((webhook.createdAt as number) * 1000).toISOString(),
+    createdBy: {
+      client_id: system.client_id,
+      name: system.name,
+      type: system.type,
+      username: system.username
+    },
+    topic: actionAndEventToTopic(webhook.action, webhook.event)
+  }))
+
+  return h.response({ entries }).code(200)
 }
 
 export async function deleteWebhookHandler(
@@ -238,7 +233,7 @@ export async function deleteWebhookHandler(
     return h.response('No webhook id in URL params').code(400)
   }
   try {
-    await Webhook.findOneAndRemove({ webhookId })
+    await Webhook.findOneAndRemove({ id: webhookId })
   } catch (err) {
     return h.response(`Could not delete webhook: ${webhookId}`).code(400)
   }
@@ -259,7 +254,7 @@ export async function deleteWebhookByClientIdHandler(
   }
 
   try {
-    await Webhook.deleteMany({ 'createdBy.client_id': clientId })
+    await Webhook.deleteMany({ createdBy: clientId })
   } catch (err) {
     logger.info(
       `Could not delete webhooks associated with client_id: ${clientId}`

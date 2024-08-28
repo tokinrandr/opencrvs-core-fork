@@ -31,6 +31,7 @@ import {
 } from '@workflow/features/registration/utils'
 import { getFromFhir } from '@workflow/features/registration/fhir/fhir-utils'
 import { getValidRecordById } from '@workflow/records'
+import { triggerWebhooks } from '@workflow/records/webhooks'
 
 export async function eventNotificationHandler(
   request: Hapi.Request,
@@ -120,6 +121,7 @@ export async function eventNotificationHandler(
 
   await indexBundle(updatedBundle, token)
   await auditEvent('sent-notification', updatedBundle, token)
+  triggerWebhooks({ record: updatedBundle, action: 'sent-notification', token })
 
   return h.response(updatedBundle).code(200)
 }
