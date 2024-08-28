@@ -82,10 +82,7 @@ const ErrorWrapper = styled.div`
   margin-bottom: 16px;
 `
 
-const CERTIFICATE_TYPE = {
-  SHORT: 'short',
-  FULL: 'full'
-}
+type CertificateType = 'short' | 'full'
 
 type PropsWhenDeclarationIsFound = {
   registerForm: IForm
@@ -225,98 +222,15 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
     })
   }
 
-  fullCertButtonHandler = (
+  certButtonHandler = (
     declarationId: string,
     currentGroup: string,
     nextGroup: string | undefined,
     event: Event,
     sectionId: keyof IPrintableDeclaration['data'],
     fields: IFormField[],
-    draft: IPrintableDeclaration | undefined
-  ) => {
-    if (!draft) return
-
-    const errors = getErrorsOnFieldsBySection(sectionId, fields, draft)
-    const errorValues = Object.values(errors).map(Object.values)
-    const errLength = flatten(errorValues).filter(
-      (errs) => errs.length > 0
-    ).length
-
-    const certificates = draft.data.registration.certificates
-    const certificate = (certificates && certificates[0]) || {}
-    const collector = certificate[
-      sectionId as keyof typeof certificate
-    ] as IFormSectionData
-
-    if (errLength > 0) {
-      this.setState({
-        showError: true
-      })
-
-      return
-    }
-    draft.data.template.certificateType = CERTIFICATE_TYPE.FULL
-    const { userDetails } = this.props as PropsWhenDeclarationIsFound
-    draft.data.template.systemRole =
-      userDetails?.role.labels.find((x) => x.label === 'Registrar')?.label || ''
-    if (currentGroup === 'affidavit') {
-      if (
-        collector.affidavitFile &&
-        (collector.affidavitFile as IFormSectionData).data
-      ) {
-        this.props.writeDeclaration(draft)
-        this.goToNextFormForSomeoneElse(declarationId, draft, event)
-
-        return
-      }
-      if (
-        !(
-          collector.noAffidavitAgreement &&
-          (collector.noAffidavitAgreement as string[]).length > 0
-        )
-      ) {
-        this.setState({
-          showError: true
-        })
-
-        return
-      }
-
-      this.props.writeDeclaration(draft)
-      this.setState({ showModalForNoSignedAffidavit: true })
-
-      return
-    }
-
-    this.setState({
-      showError: false,
-      showModalForNoSignedAffidavit: false
-    })
-    if (!nextGroup) {
-      this.props.writeDeclaration(draft)
-
-      if (isCertificateForPrintInAdvance(draft)) {
-        this.props.goToReviewCertificate(declarationId, event)
-      } else {
-        this.props.goToVerifyCollector(
-          declarationId,
-          event,
-          collector.type as string
-        )
-      }
-    } else {
-      this.props.goToPrintCertificate(declarationId, event, nextGroup)
-    }
-  }
-
-  shortCertButtonHandler = (
-    declarationId: string,
-    currentGroup: string,
-    nextGroup: string | undefined,
-    event: Event,
-    sectionId: keyof IPrintableDeclaration['data'],
-    fields: IFormField[],
-    draft: IPrintableDeclaration | undefined
+    draft: IPrintableDeclaration | undefined,
+    certificateType: CertificateType
   ) => {
     if (!draft) return
     console.log(draft)
@@ -340,7 +254,7 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
 
       return
     }
-    draft.data.template.certificateType = CERTIFICATE_TYPE.SHORT
+    draft.data.template.certificateType = certificateType
 
     if (currentGroup === 'affidavit') {
       if (
@@ -378,7 +292,8 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
     if (!nextGroup) {
       this.props.writeDeclaration(draft)
 
-      if (isCertificateForPrintInAdvance(draft)) {
+      draft.data.template.isAdvance = isCertificateForPrintInAdvance(draft)
+      if (draft.data.template.isAdvance) {
         this.props.goToReviewCertificate(declarationId, event)
       } else {
         this.props.goToVerifyCollector(
@@ -505,14 +420,15 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
             <TertiaryButton
               id="confirm_form"
               onClick={() => {
-                this.fullCertButtonHandler(
+                this.certButtonHandler(
                   declarationToBeCertified.id,
                   formGroup.id,
                   nextSectionGroup ? nextSectionGroup.groupId : undefined,
                   event,
                   formSection.id,
                   formGroup.fields,
-                  declarationToBeCertified
+                  declarationToBeCertified,
+                  'full'
                 )
               }}
               disabled={this.state.isFileUploading}
@@ -523,14 +439,15 @@ class CollectorFormComponent extends React.Component<IProps, IState> {
               // id="confirm_form"
               // hidden={event == 'death'}
               onClick={() => {
-                this.shortCertButtonHandler(
+                this.certButtonHandler(
                   declarationToBeCertified.id,
                   formGroup.id,
                   nextSectionGroup ? nextSectionGroup.groupId : undefined,
                   event,
                   formSection.id,
                   formGroup.fields,
-                  declarationToBeCertified
+                  declarationToBeCertified,
+                  'short'
                 )
               }}
               disabled={this.state.isFileUploading}
