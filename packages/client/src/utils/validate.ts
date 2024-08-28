@@ -14,7 +14,6 @@ import { IFormFieldValue, IFormData } from '@opencrvs/client/src/forms'
 import {
   REGEXP_BLOCK_ALPHA_NUMERIC_DOT,
   REGEXP_DECIMAL_POINT_NUMBER,
-  INFORMANT_MINIMUM_AGE,
   NATIONAL_ID
 } from '@client/utils/constants'
 import { validate as validateEmail } from 'email-validator'
@@ -730,7 +729,7 @@ export const isInformantOfLegalAge: Validation = (value: IFormFieldValue) => {
       minAgeGapExist(
         format(new Date(Date.now()), 'yyyy-MM-dd'),
         value.toString(),
-        INFORMANT_MINIMUM_AGE
+        window.config.INFORMANT_MINIMUM_AGE
       )
     ) {
       return undefined
