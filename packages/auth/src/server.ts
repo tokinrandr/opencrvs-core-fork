@@ -66,7 +66,7 @@ import changePasswordHandler, {
 import sendUserNameHandler, {
   requestSchema as reqSendUserNameSchema
 } from '@auth/features/retrievalSteps/sendUserName/handler'
-import { tokenHandler } from '@auth/features/system/handler'
+import { tokenHandler } from '@auth/features/oauthToken/handler'
 import { logger } from '@opencrvs/commons'
 import { getPublicKey } from '@auth/features/authenticate/service'
 import anonymousTokenHandler, {
@@ -387,6 +387,14 @@ export async function createServer() {
       request.sentryScope?.setExtra('payload', request.payload)
       return h.continue
     }
+  })
+
+  server.ext('onPreResponse', (request, reply) => {
+    if ('isBoom' in request.response) {
+      console.error(request.response)
+    }
+
+    return reply.continue
   })
 
   async function stop() {

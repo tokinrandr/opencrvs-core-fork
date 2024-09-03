@@ -68,6 +68,14 @@ export async function createServer() {
     }
   })
 
+  server.ext('onPreResponse', (request, reply) => {
+    if ('isBoom' in request.response) {
+      console.error(request.response)
+    }
+
+    return reply.continue
+  })
+
   async function start() {
     return influx
       .getDatabaseNames()

@@ -24,6 +24,9 @@ export default async function getUser(
   request: Hapi.Request,
   h: Hapi.ResponseToolkit
 ) {
+  // @TODO: If the user doesn't have scope to see all users, then they can get ONLY themselves from this endpoint
+  // or should we refactor and create a `/me` endpoint?
+
   const { userId, practitionerId, mobile, email } =
     request.payload as IVerifyPayload
   let criteria = {}
