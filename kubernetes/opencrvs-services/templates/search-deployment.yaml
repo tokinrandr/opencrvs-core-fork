@@ -38,13 +38,13 @@ spec:
             - name: ES_HOST
               value: elasticsearch:9200
             - name: FHIR_URL
-              value: http://hearth:3447/fhir
+              value: http://hearth.opencrvs-deps-dev.svc.cluster.local:3447/fhir # FIXME: harcoded
             - name: HEARTH_MONGO_URL
-              value: mongodb://mongo1/hearth-dev
+              value: mongodb://mongodb.opencrvs-deps-dev.svc.cluster.local/hearth-dev
             - name: NODE_ENV
               value: development
             - name: USER_MANAGEMENT_URL
-              value: http://user-mgnt:3030/
+              value: http://user-mgnt.opencrvs-services-dev.svc.cluster.local:3030/ # FIXME: hardcoded
           ports:
             - containerPort: 9090
               protocol: TCP

@@ -11,7 +11,7 @@ ENV METRICS_URL=$METRICS_URL
 
 # Copy files
 COPY jobs/*.* ./jobs/
-COPY crontab ./
+COPY crontab .
 COPY start.sh .
 
 # create cron.log file

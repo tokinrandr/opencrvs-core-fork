@@ -36,7 +36,7 @@ spec:
             - name: COUNTRY
               value: bgd
             - name: COUNTRY_CONFIG_URL
-              value: http://countryconfig:3040
+              value: http://countryconfig.opencrvs-services-dev.svc.cluster.local:3040 # FIXME: harcoded
             - name: HOST
               value: 0.0.0.0
           ports:
