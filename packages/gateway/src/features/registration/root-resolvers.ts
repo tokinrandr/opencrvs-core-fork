@@ -58,6 +58,7 @@ import {
   markNotADuplicate
 } from '@gateway/workflow/index'
 import { getRecordById } from '@gateway/records'
+import uuid from 'uuid'
 
 async function getAnonymousToken() {
   const res = await fetch(new URL('/anonymous-token', AUTH_URL).toString())
@@ -353,7 +354,21 @@ export const resolvers: GQLResolver = {
         throw new UserInputError(error.message)
       }
 
+      createRegistration(details, EVENT_TYPE.BIRTH, authHeader)
+
       return await createRegistration(details, EVENT_TYPE.BIRTH, authHeader)
+    },
+    async createAsyncBirthRegistration(
+      _,
+      { details },
+      { headers: authHeader }
+    ) {
+      // eslint-disable-next-line no-console
+      console.log(details, authHeader)
+      return {
+        jobId: uuid(),
+        status: 'ACCEPTED'
+      }
     },
     async createDeathRegistration(_, { details }, { headers: authHeader }) {
       try {

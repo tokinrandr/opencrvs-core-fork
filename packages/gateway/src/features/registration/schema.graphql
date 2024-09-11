@@ -567,6 +567,17 @@ input CorrectionRejectionInput {
   timeLoggedMS: Int!
 }
 
+enum RecordJobStatus {
+  ACCEPTED
+  PENDING
+  COMPLETED
+}
+
+type RecordJob {
+  jobId: ID!
+  status: RecordJobStatus!
+}
+
 type Mutation {
   # Generic correction handlers for all event types
   # Applying a correction request is made on a event level as payload is dependant on event type
@@ -600,6 +611,7 @@ type Mutation {
 
   # BIRTH
   createBirthRegistration(details: BirthRegistrationInput!): CreatedIds!
+  createAsyncBirthRegistration(details: BirthRegistrationInput!): RecordJob!
   updateBirthRegistration(id: ID!, details: BirthRegistrationInput!): ID!
   # process transitions
   markBirthAsVerified(

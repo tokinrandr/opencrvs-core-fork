@@ -195,6 +195,7 @@ type Mutation {
     details: MarriageRegistrationInput!
   ): ID!
   createBirthRegistration(details: BirthRegistrationInput!): CreatedIds!
+  createAsyncBirthRegistration(details: BirthRegistrationInput!): RecordJob!
   updateBirthRegistration(id: ID!, details: BirthRegistrationInput!): ID!
   markBirthAsVerified(
     id: ID!
@@ -794,6 +795,11 @@ type CreatedIds {
   compositionId: String
   trackingId: String
   isPotentiallyDuplicate: Boolean
+}
+
+type RecordJob {
+  jobId: ID!
+  status: RecordJobStatus!
 }
 
 type Reinstated {
@@ -1405,6 +1411,12 @@ input MedicalPractitionerInput {
   name: String
   qualification: String
   lastVisitDate: Date
+}
+
+enum RecordJobStatus {
+  ACCEPTED
+  PENDING
+  COMPLETED
 }
 
 enum RegStatus {
