@@ -5,13 +5,12 @@ RUN apk update && apk upgrade && apk add --no-cache gettext && apk add --no-cach
 
 ADD . .
 
-RUN ls -lha
-
-#ADD run.sh /
-#ADD initialize-database.sh /
-#ADD update-database.sh /
-#ADD environment-configuration.sql /
-#ADD metabase.init.db.sql /
+ADD run.sh /
+ADD run-dev.sh /
+ADD initialize-database.sh /
+ADD update-database.sh /
+ADD environment-configuration.sql /
+ADD metabase.init.db.sql /
 
 ENV METABASE_JAR=/app/metabase.jar
 ENV MB_DB_INIT_SQL_FILE=/metabase.init.db.sql

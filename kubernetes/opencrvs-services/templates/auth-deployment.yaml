@@ -61,6 +61,10 @@ spec:
             - mountPath: /secrets/private-key.pem
               name: private-key
               subPath: private-key.pem
+          readinessProbe:
+            httpGet:
+              path: /ping
+              port: 4040
       restartPolicy: Always
       volumes:
         - configMap:

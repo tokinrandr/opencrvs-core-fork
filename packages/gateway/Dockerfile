@@ -12,7 +12,4 @@ RUN yarn build
 RUN ls -lha /app/packages/gateway/build/dist/src
 RUN ls -lha /app/packages/gateway/build/dist/src/graphql
 
-
-
-
 CMD [ "yarn", "start:prod" ]
