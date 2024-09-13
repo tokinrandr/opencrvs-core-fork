@@ -7,10 +7,6 @@ metadata:
     app: migration
   name: migration
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: migration
   template:
     metadata:
       labels:
@@ -18,7 +14,7 @@ spec:
     spec:
       containers:
         - name: migration
-          image: "opencrvs/migration:{{ .Values.image.tag }}"
+          image: "opencrvs/ocrvs-migration:{{ .Values.image.tag }}"
           env:
             - name: APPLICATION_CONFIG_MONGO_URL
               value: mongodb://mongodb.opencrvs-deps-dev.svc.cluster.local/application-config
@@ -42,3 +38,4 @@ spec:
               value: mongo1:27017,influxdb:8086,minio:9000,elasticsearch:9200
       completions: 1 # Run the job once
       backoffLimit: 0 # Don't retry if the job fails
+      restartPolicy: "OnFailure"

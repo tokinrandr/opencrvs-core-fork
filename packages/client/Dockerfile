@@ -15,10 +15,11 @@ RUN yarn install --frozen-lockfile && yarn build
 FROM nginx:1.27
 RUN apt-get update && apt-get upgrade -y
 
-COPY --from=0 /app/packages/client/build/ /usr/share/nginx/html/
-
-COPY infrastructure/nginx-deploy-config.sh /
+COPY client/nginx/nginx-deploy-config.sh /
 COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
+RUN chmod +x /nginx-deploy-config.sh
+
+COPY --from=0 /app/packages/client/build/ /usr/share/nginx/html/
 
 RUN chmod +x /nginx-deploy-config.sh
 CMD ["bash", "-c", "'./nginx-deploy-config.sh'"]
