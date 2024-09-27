@@ -16,7 +16,7 @@ FROM nginx:1.27
 RUN apt-get update && apt-get upgrade -y
 
 COPY client/nginx/nginx-deploy-config.sh /
-COPY packages/client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY client/nginx.conf /etc/nginx/conf.d/default.conf
 RUN chmod +x /nginx-deploy-config.sh
 
 COPY --from=0 /app/packages/client/build/ /usr/share/nginx/html/

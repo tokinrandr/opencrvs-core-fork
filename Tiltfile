@@ -3,16 +3,19 @@ load('ext://configmap', 'configmap_create')
 load('ext://secret', 'secret_create_generic', 'secret_from_dict')
 load('ext://namespace', 'namespace_create', 'namespace_inject')
 
+# Disable parallel updates, default 3
+update_settings(max_parallel_updates=2)
+
 # Only use for local dev with docker desktop
 allow_k8s_contexts('docker-desktop')
 
 
 # Build baseimage
-docker_build("opencrvs/ocrvs-base", ".", dockerfile="packages/Dockerfile.base", only=["packages/commons","package.json","yarn.lock"])
+docker_build("opencrvs/ocrvs-base", ".", dockerfile="packages/Dockerfile.base", only=["packages/commons","package.json","yarn.lock"], network="host")
 
 # Build services
-docker_build("opencrvs/ocrvs-client:local", "packages", dockerfile="packages/client/Dockerfile", only=["components","client"])
-docker_build("opencrvs/ocrvs-login:local", "packages", dockerfile="packages/login/Dockerfile", only=["components","login"])
+docker_build("opencrvs/ocrvs-client:local", "packages", dockerfile="packages/client/Dockerfile", only=["components","client"], network="host")
+docker_build("opencrvs/ocrvs-login:local", "packages", dockerfile="packages/login/Dockerfile", only=["components","login"], network="host")
 
 apps = ['auth', 
               'config',
@@ -30,7 +33,7 @@ apps = ['auth',
 
 def build_services():
   for app in apps:
-    docker_build("opencrvs/ocrvs-{}:local".format(app), "packages/{}".format(app))
+    docker_build("opencrvs/ocrvs-{}:local".format(app), "packages/{}".format(app), network="host")
 
 build_services()
 
