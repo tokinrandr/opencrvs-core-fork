@@ -24,5 +24,5 @@ spec:
             - name: NODE_ENV
               value: development
             - name: OPENHIM_MONGO_URL
-              value: mongodb://mongodb-1.mongodb.opencrvs-deps-dev.svc.cluster.local/openhim-dev
+              value: mongodb://mongodb-0.mongodb.opencrvs-deps-dev.svc.cluster.local/openhim-dev
       restartPolicy: Always

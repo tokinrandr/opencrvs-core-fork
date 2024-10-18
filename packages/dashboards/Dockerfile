@@ -3,8 +3,6 @@ FROM metabase/metabase:v0.46.6.4
 # Install envsubst, uuidgen
 RUN apk update && apk upgrade && apk add --no-cache gettext && apk add --no-cache util-linux
 
-ADD . .
-
 ADD run.sh /
 ADD run-dev.sh /
 ADD initialize-database.sh /
