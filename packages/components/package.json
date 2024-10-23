@@ -12,7 +12,6 @@
     "patch-package": "^6.1.2",
     "phosphor-react": "^1.4.1",
     "polished": "^4.2.2",
-    "postinstall-postinstall": "^2.0.0",
     "rc-menu": "^7.4.13",
     "rc-progress": "^2.5.2",
     "react-select": "^2.0.0",
