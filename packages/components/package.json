@@ -28,8 +28,9 @@
   "scripts": {
     "clean": "rimraf lib",
     "start": "concurrently 'storybook dev --ci -p 6060' 'tsc -w'",
-    "build": "yarn clean && tsc",
-    "lint": "yarn lint:css",
+    "build": "npm run clean && tsc",
+    "postinstall": "npm run build",
+    "lint": "npm run lint:css",
     "test": "tsc",
     "lint:css": "stylelint 'src/**/*.{ts,tsx}'",
     "build:clean": "rm -rf lib",
