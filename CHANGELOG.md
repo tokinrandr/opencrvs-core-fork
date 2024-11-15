@@ -4,7 +4,7 @@
 
 ### Breaking changes
 
-- **Dashboard:** Changes made to the dashboard configuration will reset after upgrading OpenCRVS. 
+- **Dashboard:** Changes made to the dashboard configuration will reset after upgrading OpenCRVS.
 
 ## Improvements
 
@@ -36,6 +36,13 @@
 - Only render units/postfix when field has a value [#7055](https://github.com/opencrvs/opencrvs-core/issues/7055)
 - Only show items with values in review [#5192](https://github.com/opencrvs/opencrvs-core/pull/5192)
 - Fix prefix text overlap issue in form text inputs
+
+## 1.6.1
+
+## Bug fixes
+
+- Stops local sys admins creating national level users. [#7698](https://github.com/opencrvs/opencrvs-core/issues/7698)
+- Stops sys admins deactivating themselves by mistake. [#7691](https://github.com/opencrvs/opencrvs-core/issues/7691)
 
 ## 1.6.0 Release candidate
 
